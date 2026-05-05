@@ -107,7 +107,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
             {habits.map((task, index) => {
-              const logId = `${task.id}-${today}`;
+              const logId = `${task.id}-${todayISO}`;
               const isCompleted = logs[logId]?.completed || false;
 
               return (
@@ -115,7 +115,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                   <TouchableOpacity
                     className="flex-row items-center py-3"
                     onPress={() =>
-                      setTaskCompleted(task.id, today, !isCompleted)
+                      setTaskCompleted(task.id, todayISO, !isCompleted)
                     }
                   >
                     {isCompleted ? (
@@ -156,7 +156,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
             {timers.map((task, index) => {
-              const logId = `${task.id}-${today}`;
+              const logId = `${task.id}-${todayISO}`;
               const elapsed = logs[logId]?.value || 0;
               const target = task.target || 3600;
               const progress = Math.min((elapsed / target) * 100, 100);
@@ -221,7 +221,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
             {counters.map((task, index) => {
-              const logId = `${task.id}-${today}`;
+              const logId = `${task.id}-${todayISO}`;
               const value = logs[logId]?.value || 0;
               const target = task.target || 1;
               const progress = Math.min((value / target) * 100, 100);
@@ -238,7 +238,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                           {value} / {target}
                         </Text>
                         <TouchableOpacity
-                          onPress={() => logTaskProgress(task.id, today, 1)}
+                          onPress={() => logTaskProgress(task.id, todayISO, 1)}
                           className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center"
                         >
                           <Plus color="#FFF" size={16} />

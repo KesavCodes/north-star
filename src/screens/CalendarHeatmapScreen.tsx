@@ -1,62 +1,106 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
-import { useStore } from '../store/useStore';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+  ScrollView,
+} from "react-native";
+import { useStore } from "../store/useStore";
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  isToday,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
+import { ChevronLeft, ChevronRight, Circle } from "lucide-react-native";
+import { Task } from "../types";
 
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
-  const { logs, tasks } = useStore();
+  const { logs, getTasksForDate } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday start
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
+  const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
   const dateFormat = "MMMM yyyy";
   const days = eachDayOfInterval({
     start: startDate,
-    end: endDate
+    end: endDate,
   });
+
+  const monthlyTaskData = eachDayOfInterval({
+    start: monthStart,
+    end: monthEnd,
+  }).reduce((acc: any, day) => {
+    const dateStr = format(day, "yyyy-MM-dd");
+    acc[dateStr] = getTasksForDate(dateStr);
+    return acc;
+  }, {});
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  // Determine day color based on task completions
   const getDayColor = (dateStr: string) => {
-    // Collect all logs for this date
-    const dailyLogs = Object.values(logs).filter(log => log.date === dateStr);
-    if (dailyLogs.length === 0) return 'bg-slate-50 border-slate-100'; // No Data
-
-    // We can calculate a simple completion ratio
-    const completedTasks = dailyLogs.filter(log => log.completed).length;
-    // Just a basic heuristic since we don't have historical task lists easily. 
-    // We assume logs present means tasks were active.
-    
-    if (completedTasks === 0) return 'bg-red-100 border-red-200'; // Missed
-    if (completedTasks < dailyLogs.length) return 'bg-yellow-100 border-yellow-200'; // Partial
-    return 'bg-[#2ECC71] border-[#2ECC71]'; // Great Day (all attempted were completed)
+    const currentDateStr = format(new Date(), "yyyy-MM-dd");
+    const dailyLogs = monthlyTaskData[dateStr]?.filter((item: Task) => {
+      if (!item.isRoutine) return true;
+      const createdDateStr = format(new Date(item.createdAt), "yyyy-MM-dd");
+      return dateStr >= createdDateStr && dateStr <= currentDateStr;
+    });
+    if (!dailyLogs || dailyLogs.length === 0)
+      return "bg-slate-50 border-slate-100";
+    const completedTasks = dailyLogs.filter(
+      (log: any) => logs[`${log.id}-${dateStr}`]?.completed,
+    ).length;
+    // console.log(dateStr, completedTasks, dailyLogs.length);
+    if (completedTasks === 0) return "bg-red-100 border-red-200";
+    if (completedTasks < dailyLogs.length)
+      return "bg-yellow-100 border-yellow-200"; // Partial
+    return "bg-[#2ECC71] border-[#2ECC71]"; // Great Day (all attempted were completed)
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F8F9FA]" style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
+    <SafeAreaView
+      className="flex-1 bg-[#F8F9FA]"
+      style={{
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+      }}
+    >
       {/* Header */}
       <View className="flex-row justify-between items-center px-5 mt-4">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="p-2 -ml-2"
+        >
           <ChevronLeft color="#334155" size={24} />
         </TouchableOpacity>
         <Text className="text-lg font-bold text-slate-800">Calendar</Text>
         <View className="w-8" />
       </View>
 
-      <ScrollView className="flex-1 px-5 mt-6" showsVerticalScrollIndicator={false}>
-        
+      <ScrollView
+        className="flex-1 px-5 mt-6"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Month Selector */}
         <View className="flex-row justify-between items-center mb-6">
           <TouchableOpacity onPress={prevMonth} className="p-2">
             <ChevronLeft color="#334155" size={20} />
           </TouchableOpacity>
-          <Text className="text-base font-bold text-slate-800">{format(currentDate, dateFormat)}</Text>
+          <Text className="text-base font-bold text-slate-800">
+            {format(currentDate, dateFormat)}
+          </Text>
           <TouchableOpacity onPress={nextMonth} className="p-2">
             <ChevronRight color="#334155" size={20} />
           </TouchableOpacity>
@@ -64,65 +108,100 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
 
         {/* Days Header */}
         <View className="flex-row justify-between mb-4">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-            <Text key={d} className="text-xs font-semibold text-slate-400 w-10 text-center">{d}</Text>
-          ))}
+          {days
+            .map((day) => format(day, "eee"))
+            .slice(0, 7)
+            .map((d, idx) => (
+              <Text
+                key={`${d}-${idx}`}
+                className="text-xs font-semibold text-slate-400 w-10 text-center"
+              >
+                {d}
+              </Text>
+            ))}
         </View>
 
         {/* Calendar Grid */}
-        <View className="flex-row flex-wrap justify-between">
-          {days.map((day, i) => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const colorClass = getDayColor(dateStr);
-            const isCurrentMonth = isSameMonth(day, monthStart);
-            const isTodayDate = isToday(day);
-
-            return (
-              <TouchableOpacity 
-                key={day.toISOString()}
-                onPress={() => navigation.navigate('DayDetails', { date: dateStr })}
-                className={`w-10 h-10 mb-4 rounded-full items-center justify-center border ${isCurrentMonth ? colorClass : 'bg-transparent border-transparent opacity-30'} ${isTodayDate ? 'border-blue-500 border-2' : ''}`}
-              >
-                <Text className={`text-sm font-medium ${colorClass.includes('bg-[#2ECC71]') ? 'text-white' : 'text-slate-700'}`}>
-                  {format(day, 'd')}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+        <View>
+          {Array.from({ length: Math.ceil(days.length / 7) }).map(
+            (_, rowIndex) => (
+              <View key={rowIndex} className="flex-row justify-between w-full">
+                {days.slice(rowIndex * 7, (rowIndex + 1) * 7).map((day) => {
+                  const dateStr = format(day, "yyyy-MM-dd");
+                  const colorClass = getDayColor(dateStr);
+                  const isCurrentMonth = isSameMonth(day, monthStart);
+                  const isTodayDate = isToday(day);
+                  if (isTodayDate) {
+                    console.log(colorClass, dateStr);
+                  }
+                  return (
+                    <TouchableOpacity
+                      key={day.toISOString()}
+                      onPress={() =>
+                        navigation.navigate("DayDetails", { date: dateStr })
+                      }
+                      className={`w-10 h-10 mb-4 rounded-full relative
+                        items-center justify-center border 
+                        ${isCurrentMonth ? colorClass : "bg-transparent border-transparent opacity-30"}`}
+                    >
+                      <Text
+                        className={`text-sm font-medium 
+                          ${colorClass.includes("bg-[#2ECC71]") ? "text-white" : "text-slate-700"}`}
+                      >
+                        {format(day, "d")}
+                      </Text>
+                      {isTodayDate && (
+                        <View className="absolute -top-1 -right-1 bg-white rounded-full p-[1px]">
+                          <Circle color="#3B82F6" size={12} fill="#3B82F6" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ),
+          )}
         </View>
 
         {/* Legend */}
         <View className="flex-row justify-between items-center mt-6 pt-6 border-t border-slate-200">
-           <View className="flex-row items-center">
-             <View className="w-2 h-2 rounded-full bg-[#2ECC71] mr-1" />
-             <Text className="text-[10px] text-slate-500">Great Day</Text>
-           </View>
-           <View className="flex-row items-center">
-             <View className="w-2 h-2 rounded-full bg-yellow-400 mr-1" />
-             <Text className="text-[10px] text-slate-500">Partial Day</Text>
-           </View>
-           <View className="flex-row items-center">
-             <View className="w-2 h-2 rounded-full bg-red-400 mr-1" />
-             <Text className="text-[10px] text-slate-500">Missed Day</Text>
-           </View>
-           <View className="flex-row items-center">
-             <View className="w-2 h-2 rounded-full bg-slate-200 mr-1" />
-             <Text className="text-[10px] text-slate-500">No Data</Text>
-           </View>
+          <View className="flex-row items-center">
+            <View className="w-2 h-2 rounded-full bg-[#2ECC71] mr-1" />
+            <Text className="text-[10px] text-slate-500">Great Day</Text>
+          </View>
+          <View className="flex-row items-center">
+            <View className="w-2 h-2 rounded-full bg-yellow-400 mr-1" />
+            <Text className="text-[10px] text-slate-500">Partial Day</Text>
+          </View>
+          <View className="flex-row items-center">
+            <View className="w-2 h-2 rounded-full bg-red-400 mr-1" />
+            <Text className="text-[10px] text-slate-500">Missed Day</Text>
+          </View>
+          <View className="flex-row items-center">
+            <View className="w-2 h-2 rounded-full bg-slate-200 mr-1" />
+            <Text className="text-[10px] text-slate-500">No Data</Text>
+          </View>
         </View>
 
         {/* Selected Day Preview (Optional, showing Today as default) */}
-        <TouchableOpacity 
-           onPress={() => navigation.navigate('DayDetails', { date: format(new Date(), 'yyyy-MM-dd') })}
-           className="mt-8 bg-white rounded-2xl p-5 flex-row justify-between items-center shadow-sm border border-slate-100"
+        {/* <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("DayDetails", {
+              date: format(new Date(), "yyyy-MM-dd"),
+            })
+          }
+          className="mt-8 bg-white rounded-2xl p-5 flex-row justify-between items-center shadow-sm border border-slate-100"
         >
-           <View>
-             <Text className="text-base font-bold text-slate-800">{format(new Date(), 'dd MMM, yyyy')}</Text>
-             <Text className="text-sm text-slate-500 mt-1">Tap to view full day details</Text>
-           </View>
-           <ChevronRight color="#CBD5E1" size={24} />
-        </TouchableOpacity>
-
+          <View>
+            <Text className="text-base font-bold text-slate-800">
+              {format(new Date(), "dd MMM, yyyy")}
+            </Text>
+            <Text className="text-sm text-slate-500 mt-1">
+              Tap to view full day details
+            </Text>
+          </View>
+          <ChevronRight color="#CBD5E1" size={24} />
+        </TouchableOpacity> */}
       </ScrollView>
     </SafeAreaView>
   );

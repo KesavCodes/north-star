@@ -30,7 +30,7 @@ const OverviewCards = ({
 }) => {
   const navigation = useNavigation<any>();
   const { logs } = useStore();
-  const today = format(new Date(), "dd MMM, yyyy");
+  const today = format(new Date(), "yyyy-MM-dd");
   const completedTasks = taskData.reduce((acc, curr) => {
     const logId = `${curr.id}-${today}`;
     if (logs[logId]?.completed) {
@@ -103,7 +103,7 @@ const OverviewCards = ({
 
 const TodaysOverview = () => {
   const { getTasksForDate } = useStore();
-  const todayISO = new Date().toISOString().split("T")[0];
+  const todayISO = format(new Date(), "yyyy-MM-dd");
   // Filter tasks for today
   const activeTasks = getTasksForDate(todayISO);
   // Compute progress for Discipline

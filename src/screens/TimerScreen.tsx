@@ -8,10 +8,12 @@ import Svg, { Circle } from 'react-native-svg';
 export const TimerScreen = ({ route, navigation }: any) => {
   const { taskId } = route.params || {};
   const { getTaskById, logs, addTimerSession } = useStore();
-  const today = format(new Date(), 'dd MMM, yyyy');
+  const todayDateObj = new Date();
+  const today = format(todayDateObj, 'dd MMM, yyyy');
+  const todayISO = todayDateObj.toISOString().split("T")[0];
 
   const task = taskId ? getTaskById(taskId) : undefined;
-  const logId = taskId ? `${taskId}-${today}` : null;
+  const logId = taskId ? `${taskId}-${todayISO}` : null;
   const existingLog = logId ? logs[logId] : null;
 
   const [isRunning, setIsRunning] = useState(false);
@@ -36,7 +38,7 @@ export const TimerScreen = ({ route, navigation }: any) => {
       // Pause
       setIsRunning(false);
       if (sessionStartTime && taskId) {
-        addTimerSession(taskId, today, { startTime: sessionStartTime, endTime: Date.now() });
+        addTimerSession(taskId, todayISO, { startTime: sessionStartTime, endTime: Date.now() });
       }
       setSessionStartTime(null);
     } else {
