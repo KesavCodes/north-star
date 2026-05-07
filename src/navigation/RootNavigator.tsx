@@ -25,7 +25,10 @@ export const RootNavigator = () => {
           <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} />
           <Stack.Screen name="TimerScreen" component={TimerScreen} />
           <Stack.Screen name="DailyTracker" component={DailyTrackerScreen} />
-          <Stack.Screen name="CalendarHeatmap" component={CalendarHeatmapScreen} />
+          <Stack.Screen
+            name="CalendarHeatmap"
+            component={CalendarHeatmapScreen}
+          />
           <Stack.Screen name="DayDetails" component={DayDetailsScreen} />
           <Stack.Screen name="Streaks" component={StreaksScreen} />
         </>

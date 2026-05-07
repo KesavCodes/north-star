@@ -1,13 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AppState, Task, TaskLog, JournalEntry } from "../types";
+import { AppState } from "../types";
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
-const getLogId = (taskId: string, date: string) => {
-  const dateStr = date.includes("T") ? date.split("T")[0] : date;
-  return `${taskId}-${dateStr}`;
-};
+const getLogId = (taskId: string, date: string) => `${taskId}-${date}`;
 
 export const useStore = create<AppState>()(
   persist(
@@ -88,12 +85,11 @@ export const useStore = create<AppState>()(
 
       logTaskProgress: (taskId, date, valueIncrement, completed) =>
         set((state) => {
-          const dateStr = date.includes("T") ? date.split("T")[0] : date;
-          const logId = getLogId(taskId, dateStr);
+          const logId = getLogId(taskId, date);
           const existingLog = state.logs[logId] || {
             id: logId,
             taskId,
-            date: dateStr,
+            date,
             value: 0,
             completed: false,
           };
@@ -117,12 +113,11 @@ export const useStore = create<AppState>()(
 
       setTaskCompleted: (taskId, date, completed) =>
         set((state) => {
-          const dateStr = date.includes("T") ? date.split("T")[0] : date;
-          const logId = getLogId(taskId, dateStr);
+          const logId = getLogId(taskId, date);
           const existingLog = state.logs[logId] || {
             id: logId,
             taskId,
-            date: dateStr,
+            date,
             value: 0,
             completed: false,
           };
@@ -137,12 +132,11 @@ export const useStore = create<AppState>()(
 
       addTimerSession: (taskId, date, session) =>
         set((state) => {
-          const dateStr = date.includes("T") ? date.split("T")[0] : date;
-          const logId = getLogId(taskId, dateStr);
+          const logId = getLogId(taskId, date);
           const existingLog = state.logs[logId] || {
             id: logId,
             taskId,
-            date: dateStr,
+            date,
             value: 0,
             completed: false,
             sessions: [],

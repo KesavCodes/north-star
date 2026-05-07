@@ -24,7 +24,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
     useStore();
   const todayDateObj = new Date();
   const today = format(todayDateObj, "dd MMM, yyyy");
-  const todayISO = todayDateObj.toISOString().split("T")[0];
+  const todayISO = format(todayDateObj, "yyyy-MM-dd");
 
   const [activeCategory, setActiveCategory] = useState(
     route?.params?.category || "all",

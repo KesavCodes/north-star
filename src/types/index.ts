@@ -15,9 +15,9 @@ export interface Task {
 }
 
 export interface TaskLog {
-  id: string; // usually `${taskId}-${dateYYYYMMDD}`
+  id: string; // `${taskId}-${YYYY-MM-DD}`
   taskId: string;
-  date: string; // YYYY-MM-DD for easy querying
+  date: string;
   completed: boolean; // For checkbox (is it checked), Timer (did it reach target), Counter (did it reach target)
   value: number; // elapsed time for timer, count for counter
   sessions?: { startTime: number; endTime: number }[]; // For timer tracking multiple sessions

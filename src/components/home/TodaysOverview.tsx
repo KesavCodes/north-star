@@ -11,7 +11,7 @@ const cardConfig = {
     name: "Discipline",
     completedColor: "#2ECC71",
     pendingColor: "#f1f2f6",
-    emoji: "🌱",
+    emoji: "💚", //🌱
   },
   kindness: {
     name: "Kindness",

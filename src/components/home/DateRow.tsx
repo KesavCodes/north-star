@@ -9,8 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const DateRow = () => {
   const navigation = useNavigation<any>();
-  const todayDateObj = new Date();
-  const today = format(todayDateObj, "dd MMM, yyyy");
+  const today = format(new Date(), "dd MMM, yyyy");
   return (
     <View className="flex-row justify-between items-center mt-8">
       <View>

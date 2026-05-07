@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,13 @@ import {
   startOfWeek,
   endOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Circle } from "lucide-react-native";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  Flame,
+  Heart,
+} from "lucide-react-native";
 import { Task } from "../types";
 
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
@@ -50,6 +56,63 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+
+  const streaks = useMemo(() => {
+    const calc = (category: string) => {
+      let current = 0;
+      let best = 0;
+      const logDates = Object.values(logs)
+        .map((l: any) => l.date)
+        .filter((date: any) => date && /^\d{4}-\d{2}-\d{2}$/.test(date));
+      if (logDates.length === 0) return { current: 0, best: 0 };
+
+      logDates.sort(
+        (a: any, b: any) => new Date(a).getTime() - new Date(b).getTime(),
+      );
+      const earliestDate = new Date(logDates[0]);
+      const todayDate = new Date();
+
+      if (earliestDate > todayDate) return { current: 0, best: 0 };
+
+      const daysToCheck = eachDayOfInterval({
+        start: earliestDate,
+        end: todayDate,
+      });
+
+      daysToCheck.forEach((day) => {
+        const dateStr = format(day, "yyyy-MM-dd");
+        const activeTasks = getTasksForDate(dateStr).filter((t: Task) => {
+          if (t.category !== category) return false;
+          if (!t.isRoutine) return true;
+          const createdDateStr = format(new Date(t.createdAt), "yyyy-MM-dd");
+          return (
+            dateStr >= createdDateStr &&
+            dateStr <= format(todayDate, "yyyy-MM-dd")
+          );
+        });
+        if (activeTasks.length === 0) return;
+        const completedCount = activeTasks.filter(
+          (t: Task) => logs[`${t.id}-${dateStr}`]?.completed,
+        ).length;
+
+        if (completedCount === activeTasks.length) {
+          current++;
+          best = Math.max(best, current);
+        } else {
+          if (dateStr !== format(todayDate, "yyyy-MM-dd")) {
+            current = 0;
+          }
+        }
+      });
+
+      return { current, best };
+    };
+
+    return {
+      discipline: calc("discipline"),
+      kindness: calc("kindness"),
+    };
+  }, [logs, getTasksForDate]);
 
   const getDayColor = (dateStr: string) => {
     const currentDateStr = format(new Date(), "yyyy-MM-dd");
@@ -131,9 +194,6 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
                   const colorClass = getDayColor(dateStr);
                   const isCurrentMonth = isSameMonth(day, monthStart);
                   const isTodayDate = isToday(day);
-                  if (isTodayDate) {
-                    console.log(colorClass, dateStr);
-                  }
                   return (
                     <TouchableOpacity
                       key={day.toISOString()}
@@ -183,25 +243,49 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
           </View>
         </View>
 
-        {/* Selected Day Preview (Optional, showing Today as default) */}
-        {/* <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("DayDetails", {
-              date: format(new Date(), "yyyy-MM-dd"),
-            })
-          }
-          className="mt-8 bg-white rounded-2xl p-5 flex-row justify-between items-center shadow-sm border border-slate-100"
-        >
-          <View>
-            <Text className="text-base font-bold text-slate-800">
-              {format(new Date(), "dd MMM, yyyy")}
-            </Text>
-            <Text className="text-sm text-slate-500 mt-1">
-              Tap to view full day details
-            </Text>
+        {/* Streaks Overview */}
+        <View className="mt-8 mb-8">
+          <Text className="text-base font-bold text-slate-800 mb-4 px-1">
+            Current Streaks
+          </Text>
+          <View className="flex-row space-x-4">
+            <View className="flex-1 bg-white rounded-3xl p-5 shadow-sm border border-slate-50 mr-2">
+              <Text className="text-sm font-bold text-[#F39C12] mb-4">
+                Discipline
+              </Text>
+              <View className="flex-row items-center mb-2">
+                <Flame color="#F39C12" size={28} fill="#F39C12" />
+                <Text className="text-3xl font-bold text-slate-800 ml-2">
+                  {streaks.discipline.current}{" "}
+                  <Text className="text-base text-slate-500 font-medium">
+                    days
+                  </Text>
+                </Text>
+              </View>
+              <Text className="text-xs text-slate-400">
+                Best: {streaks.discipline.best} days
+              </Text>
+            </View>
+
+            <View className="flex-1 bg-white rounded-3xl p-5 shadow-sm border border-slate-50 ml-2">
+              <Text className="text-sm font-bold text-[#E74C3C] mb-4">
+                Kindness
+              </Text>
+              <View className="flex-row items-center mb-2">
+                <Heart color="#E74C3C" size={28} fill="#E74C3C" />
+                <Text className="text-3xl font-bold text-slate-800 ml-2">
+                  {streaks.kindness.current}{" "}
+                  <Text className="text-base text-slate-500 font-medium">
+                    days
+                  </Text>
+                </Text>
+              </View>
+              <Text className="text-xs text-slate-400">
+                Best: {streaks.kindness.best} days
+              </Text>
+            </View>
           </View>
-          <ChevronRight color="#CBD5E1" size={24} />
-        </TouchableOpacity> */}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
