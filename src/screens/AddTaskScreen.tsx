@@ -24,9 +24,12 @@ import {
 } from "lucide-react-native";
 import { TaskType, TaskCategory } from "../types";
 import { format } from "date-fns";
+import TimePickerDropdown from "../components/addTask/TimePickerDropdown";
+import { useToast } from "../components/ToastProvider";
 
 export const AddTaskScreen = ({ navigation }: any) => {
   const { addTask } = useStore();
+  const { showToast } = useToast();
 
   const [taskType, setTaskType] = useState<TaskType>("checkbox");
   const [isRoutine, setIsRoutine] = useState(true);
@@ -47,7 +50,14 @@ export const AddTaskScreen = ({ navigation }: any) => {
   ];
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      showToast({
+        title: "Missing Name",
+        body: "Please enter a name for the task.",
+        type: "error",
+      });
+      return;
+    }
 
     let target: number | undefined;
     if (taskType === "timer") {
@@ -67,6 +77,12 @@ export const AddTaskScreen = ({ navigation }: any) => {
       target,
       color: selectedColor,
       icon: "star", // dummy icon for now
+    });
+
+    showToast({
+      title: "Task Added",
+      body: `Successfully added ${name}.`,
+      type: "success",
     });
 
     navigation.goBack();
@@ -101,7 +117,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Frequency
         </Text>
-        <View className="flex-row space-x-4 mb-6">
+        <View className="flex-row space-x-4 mb-6 gap-2">
           <TouchableOpacity
             onPress={() => setIsRoutine(true)}
             className={`flex-1 flex-row items-center justify-center p-3 rounded-2xl border ${isRoutine ? "border-indigo-500 bg-indigo-50" : "border-slate-200 bg-white"}`}
@@ -133,7 +149,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Task Type
         </Text>
-        <View className="flex-row justify-between space-x-3 mb-6">
+        <View className="flex-row justify-between space-x-3 mb-6 gap-2">
           <TouchableOpacity
             onPress={() => setTaskType("checkbox")}
             className={`flex-1 flex-col items-center justify-center p-4 rounded-2xl border-2 ${taskType === "checkbox" ? "border-blue-500 bg-blue-50" : "border-slate-100 bg-white"}`}
@@ -193,7 +209,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Category
         </Text>
-        <View className="flex-row space-x-4 mb-6">
+        <View className="flex-row space-x-4 mb-6 gap-2">
           <TouchableOpacity
             onPress={() => setCategory("discipline")}
             className={`flex-1 flex-row items-center justify-center p-3 rounded-2xl border ${category === "discipline" ? "border-[#2ECC71] bg-[#E8F8F5]" : "border-slate-200 bg-white"}`}
@@ -231,33 +247,22 @@ export const AddTaskScreen = ({ navigation }: any) => {
               Daily Target
             </Text>
             {taskType === "timer" ? (
-              <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-6 flex-row items-center">
-                <Clock color="#94A3B8" size={20} />
-                <TextInput
-                  value={targetDurationHours}
-                  onChangeText={setTargetDurationHours}
-                  keyboardType="numeric"
-                  maxLength={2}
-                  className="text-lg font-bold text-slate-800 ml-3 w-8 text-center bg-slate-50 rounded-lg py-1"
+              <View className="mb-6">
+                <TimePickerDropdown
+                  hours={targetDurationHours}
+                  minutes={targetDurationMinutes}
+                  onHoursChange={setTargetDurationHours}
+                  onMinutesChange={setTargetDurationMinutes}
                 />
-                <Text className="text-lg font-bold text-slate-800 mx-1">:</Text>
-                <TextInput
-                  value={targetDurationMinutes}
-                  onChangeText={setTargetDurationMinutes}
-                  keyboardType="numeric"
-                  maxLength={2}
-                  className="text-lg font-bold text-slate-800 w-8 text-center bg-slate-50 rounded-lg py-1"
-                />
-                <Text className="text-slate-400 ml-2 text-sm">hh:mm</Text>
               </View>
             ) : (
-              <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-6 flex-row items-center">
-                <Hash color="#94A3B8" size={20} />
+              <View className="bg-white rounded-2xl border border-slate-100 mb-6 flex-row items-center p-2">
+                <Hash color="#94A3B8" size={22} />
                 <TextInput
                   value={targetCount}
                   onChangeText={setTargetCount}
                   keyboardType="numeric"
-                  className="text-lg font-bold text-slate-800 ml-3 flex-1"
+                  className="text-lg font-bold text-slate-800 flex-1"
                 />
               </View>
             )}
@@ -267,7 +272,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
         {/* Icon & Color */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">Color</Text>
         <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-6 flex-row justify-between items-center">
-          <View className="flex-row space-x-2">
+          <View className="flex-row space-x-2 gap-1">
             {colors.map((color) => (
               <TouchableOpacity
                 key={color}
@@ -282,13 +287,13 @@ export const AddTaskScreen = ({ navigation }: any) => {
         </View>
 
         {/* Reminder (Optional) */}
-        <Text className="text-sm font-semibold text-slate-800 mb-3">
+        {/* <Text className="text-sm font-semibold text-slate-800 mb-3">
           Reminder (Optional)
         </Text>
         <TouchableOpacity className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center">
           <Text className="text-slate-400">Add reminder</Text>
           <ChevronRight color="#CBD5E1" size={20} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
     </SafeAreaView>
   );

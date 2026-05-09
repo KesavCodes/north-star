@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useStore } from "../store/useStore";
 import * as ImagePicker from "expo-image-picker";
+import { useToast } from "../components/ToastProvider";
 import {
   Camera,
   ChevronRight,
@@ -23,6 +24,7 @@ import {
 
 export const OnboardingScreen = () => {
   const { setUserInfo } = useStore();
+  const { showToast } = useToast();
   const [name, setName] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
 
@@ -45,6 +47,17 @@ export const OnboardingScreen = () => {
       setUserInfo({
         name: name.trim(),
         profilePic: imageUri || undefined,
+      });
+      showToast({
+        title: "Welcome aboard!",
+        body: `Hi ${name.trim()}, your journey starts here.`,
+        type: "success",
+      });
+    } else {
+      showToast({
+        title: "Name is required",
+        body: "Please enter your name to proceed.",
+        type: "warning",
       });
     }
   };
