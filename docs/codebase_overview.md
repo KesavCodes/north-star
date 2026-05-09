@@ -88,3 +88,12 @@ TaskLogs are generated "lazily" or "on the fly". We do not pre-create blank logs
 
 ### Journal Lifecycle
 - **Create/Update (`saveJournal`)**: Called from the `JournalScreen`. Because journals are keyed by the date (`YYYY-MM-DD`), saving a journal for today either creates it (if it's the first time) or simply overwrites the previous entry for that day.
+
+---
+
+## 5. UI & Global Components
+
+- **Toast System**: We have a custom global toast notification system built with `react-native-reanimated` and context.
+  - **`ToastProvider` (`src/components/ToastProvider.tsx`)**: Wraps the root of the app in `App.tsx` and manages the queue of active toasts. It overlays them on top of all other screens using absolute positioning.
+  - **`Toast` (`src/components/Toast.tsx`)**: The individual UI element that slides and fades in. Supports types like `success`, `error`, `warning`, and `info`.
+  - **Usage**: Any screen or component can call `const { showToast } = useToast();` to trigger a toast notification.

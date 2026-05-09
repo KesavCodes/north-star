@@ -130,7 +130,7 @@ export const useStore = create<AppState>()(
           };
         }),
 
-      addTimerSession: (taskId, date, session) =>
+      addTimerSession: (taskId, date, session, completed) =>
         set((state) => {
           const logId = getLogId(taskId, date);
           const existingLog = state.logs[logId] || {
@@ -148,6 +148,8 @@ export const useStore = create<AppState>()(
           const sessionDuration = Math.floor(
             (session.endTime - session.startTime) / 1000,
           ); // in seconds
+          const isCompleted =
+            completed !== undefined ? completed : existingLog.completed;
 
           return {
             logs: {
@@ -156,6 +158,7 @@ export const useStore = create<AppState>()(
                 ...existingLog,
                 sessions,
                 value: existingLog.value + sessionDuration,
+                completed: isCompleted,
               },
             },
           };

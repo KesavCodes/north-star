@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  ScrollView,
 } from "react-native";
 import { useStore } from "../store/useStore";
 import { format } from "date-fns";
@@ -49,10 +50,16 @@ export const TimerScreen = ({ route, navigation }: any) => {
       // Pause
       setIsRunning(false);
       if (sessionStartTime && taskId) {
-        addTimerSession(taskId, todayISO, {
-          startTime: sessionStartTime,
-          endTime: Date.now(),
-        });
+        console.log(elapsedSeconds, target);
+        addTimerSession(
+          taskId,
+          todayISO,
+          {
+            startTime: sessionStartTime,
+            endTime: Date.now(),
+          },
+          elapsedSeconds >= target ? true : false,
+        );
       }
       setSessionStartTime(null);
     } else {
@@ -172,44 +179,46 @@ export const TimerScreen = ({ route, navigation }: any) => {
             <Play color="#FFF" size={32} fill="#FFF" className="ml-1" />
           )}
         </TouchableOpacity>
-
+        {/* 
         <TouchableOpacity className="w-12 h-12 rounded-full border border-slate-700 items-center justify-center">
           <RotateCcw color="#94A3B8" size={20} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Sessions */}
-      <View className="mt-16 px-5 flex-1">
-        <Text className="text-white text-base font-semibold mb-6">
-          Today's Sessions
-        </Text>
-        {existingLog?.sessions?.map((session, i) => {
-          const duration = Math.floor(
-            (session.endTime - session.startTime) / 1000,
-          );
-          return (
-            <View
-              key={i}
-              className="flex-row justify-between items-center py-3 border-b border-slate-800"
-            >
+      <Text className="text-white text-base font-semibold mt-5 ml-5">
+        Today's Sessions
+      </Text>
+      <View className="flex-1 mb-14 pb-8">
+        <ScrollView className="mt-3 px-5 flex-1">
+          {isRunning && sessionStartTime && (
+            <View className="flex-row justify-between items-center py-3 border-b border-slate-800">
               <Text className="text-slate-300 text-sm">
-                {format(new Date(session.startTime), "h:mm a")} -{" "}
-                {format(new Date(session.endTime), "h:mm a")}
+                {format(new Date(sessionStartTime), "h:mm a")} - Now
               </Text>
-              <Text className="text-slate-300 text-sm">
-                {formatTime(duration)}
-              </Text>
+              <Text className="text-[#2ECC71] text-sm font-medium">Active</Text>
             </View>
-          );
-        })}
-        {isRunning && sessionStartTime && (
-          <View className="flex-row justify-between items-center py-3 border-b border-slate-800">
-            <Text className="text-slate-300 text-sm">
-              {format(new Date(sessionStartTime), "h:mm a")} - Now
-            </Text>
-            <Text className="text-[#2ECC71] text-sm font-medium">Active</Text>
-          </View>
-        )}
+          )}
+          {existingLog?.sessions?.toReversed().map((session, i) => {
+            const duration = Math.floor(
+              (session.endTime - session.startTime) / 1000,
+            );
+            return (
+              <View
+                key={i}
+                className="flex-row justify-between items-center py-3 border-b border-slate-800"
+              >
+                <Text className="text-slate-300 text-sm">
+                  {format(new Date(session.startTime), "h:mm a")} -{" "}
+                  {format(new Date(session.endTime), "h:mm a")}
+                </Text>
+                <Text className="text-slate-300 text-sm">
+                  {formatTime(duration)}
+                </Text>
+              </View>
+            );
+          })}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

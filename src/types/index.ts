@@ -64,6 +64,7 @@ export interface AppState {
     taskId: string,
     date: string,
     session: { startTime: number; endTime: number },
+    completed?: boolean,
   ) => void;
 
   saveJournal: (entry: JournalEntry) => void;

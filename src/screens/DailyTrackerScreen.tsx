@@ -165,11 +165,11 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                 <View key={task.id}>
                   <View className="py-4">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-base text-slate-700 font-medium">
+                      <Text className="text-md font-semibold text-slate-700">
                         {task.name}
                       </Text>
                       <View className="flex-row items-center">
-                        <Text className="text-xs text-slate-500 mr-3">
+                        <Text className="text-sm font-semibold text-slate-500 mr-3">
                           {Math.floor(elapsed / 60)}:
                           {(elapsed % 60).toString().padStart(2, "0")} /{" "}
                           {Math.floor(target / 60)}:00
@@ -225,20 +225,22 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
               const value = logs[logId]?.value || 0;
               const target = task.target || 1;
               const progress = Math.min((value / target) * 100, 100);
-
+              const isCompleted = value + 1 >= target;
               return (
                 <View key={task.id}>
                   <View className="py-4">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-base text-slate-700 font-medium">
+                      <Text className="text-md font-semibold text-slate-700">
                         {task.name}
                       </Text>
                       <View className="flex-row items-center">
-                        <Text className="text-xs text-slate-500 mr-3">
+                        <Text className="text-sm font-semibold text-slate-500 mr-3">
                           {value} / {target}
                         </Text>
                         <TouchableOpacity
-                          onPress={() => logTaskProgress(task.id, todayISO, 1)}
+                          onPress={() =>
+                            logTaskProgress(task.id, todayISO, 1, isCompleted)
+                          }
                           className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center"
                         >
                           <Plus color="#FFF" size={16} />
