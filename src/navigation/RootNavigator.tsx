@@ -8,6 +8,7 @@ import { CalendarHeatmapScreen } from "../screens/CalendarHeatmapScreen";
 import { DayDetailsScreen } from "../screens/DayDetailsScreen";
 import { StreaksScreen } from "../screens/StreaksScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
+import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { useStore } from "../store/useStore";
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ export const RootNavigator = () => {
           />
           <Stack.Screen name="DayDetails" component={DayDetailsScreen} />
           <Stack.Screen name="Streaks" component={StreaksScreen} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
         </>
       )}
     </Stack.Navigator>

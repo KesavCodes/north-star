@@ -2,6 +2,7 @@ import React from "react";
 import { View, ScrollView, TouchableOpacity } from "react-native";
 import { ScreenWrapper } from "../components/ScreenWrapper";
 import { Bell, Menu } from "lucide-react-native";
+import { useNavigation } from "@react-navigation/native";
 import Greetings from "../components/home/Greetings";
 import DateRow from "../components/home/DateRow";
 import MotivationCard from "../components/home/MotivationCard";
@@ -10,6 +11,7 @@ import QuickActions from "../components/home/QuickActions";
 import ActiveTimers from "../components/home/ActiveTimers";
 
 export const HomeScreen = () => {
+  const navigation = useNavigation<any>();
   return (
     <ScreenWrapper className="flex-1 bg-[#F8F9FA]">
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -18,7 +20,10 @@ export const HomeScreen = () => {
           <TouchableOpacity className="p-2 -ml-2">
             <Menu color="#334155" size={24} />
           </TouchableOpacity>
-          <TouchableOpacity className="p-2 -mr-2">
+          <TouchableOpacity
+            className="p-2 -mr-2"
+            onPress={() => navigation.navigate("Notifications")}
+          >
             <Bell color="#334155" size={24} />
             <View className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
           </TouchableOpacity>
