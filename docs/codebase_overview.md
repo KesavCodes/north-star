@@ -89,6 +89,14 @@ TaskLogs are generated "lazily" or "on the fly". We do not pre-create blank logs
 ### Journal Lifecycle
 - **Create/Update (`saveJournal`)**: Called from the `JournalScreen`. Because journals are keyed by the date (`YYYY-MM-DD`), saving a journal for today either creates it (if it's the first time) or simply overwrites the previous entry for that day.
 
+### Timer Lifecycle & Global State
+Timers are managed globally so they can continue running even if the user navigates away.
+- **State**: The `activeTimers` object in Zustand stores any running timer, mapping `taskId` to its start timestamp (`startTime`).
+- **Start (`startTimer`)**: Captures the current timestamp and adds the task to `activeTimers`. It also triggers a persistent (sticky) local notification summarizing the active timers.
+- **Pause/Stop (`pauseTimer`)**: Calculates the total elapsed time since `startTime`, logs it as a session via `addTimerSession`, removes the task from `activeTimers`, and updates the local notification.
+- **UI Hydration & Re-rendering**: Any component (like `TimerScreen`, `DailyTrackerScreen`, or `ActiveTimers` on Home) can query `activeTimers[taskId]`. It calculates the live elapsed time locally using `Date.now() - startTime`. Because React does not automatically re-render when `Date.now()` changes, we use a simple local `tick` state updated by a `setInterval` (e.g., `setTick((t) => t + 1)`) purely as a mechanism to force the component to re-render every second and display the ticking time.
+- **Background/Kill Behavior**: If the app is sent to the background, the timer persists conceptually via the timestamp. Even if the app is force-killed, reopening it seamlessly recalculates the elapsed time perfectly because `startTime` is persisted in `AsyncStorage`.
+
 ---
 
 ## 5. UI & Global Components

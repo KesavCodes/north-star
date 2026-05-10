@@ -13,6 +13,7 @@ export const useStore = create<AppState>()(
       tasks: { routine: [] },
       logs: {},
       journals: {},
+      activeTimers: {},
 
       getTasksForDate: (date?: string) => {
         const routineTasks = get().tasks["routine"] || [];
@@ -158,6 +159,76 @@ export const useStore = create<AppState>()(
                 ...existingLog,
                 sessions,
                 value: existingLog.value + sessionDuration,
+                completed: isCompleted,
+              },
+            },
+          };
+        }),
+
+      startTimer: (taskId, date) =>
+        set((state) => {
+          const newTask = get().getTaskById(taskId);
+          const taskName = newTask ? newTask.name : taskId;
+          
+          const newActiveTimers = {
+            ...state.activeTimers,
+            [taskId]: { taskId, date, startTime: Date.now() },
+          };
+          
+          import("../utils/notifications").then(({ updateTimerNotification }) => {
+             const activeKeys = Object.keys(newActiveTimers);
+             const taskNames = activeKeys.map(k => get().getTaskById(k)?.name || k);
+             updateTimerNotification(activeKeys.length, taskNames);
+          });
+
+          return { activeTimers: newActiveTimers };
+        }),
+
+      pauseTimer: (taskId, date) =>
+        set((state) => {
+          const timer = state.activeTimers[taskId];
+          if (!timer) return state;
+
+          const newActiveTimers = { ...state.activeTimers };
+          delete newActiveTimers[taskId];
+
+          import("../utils/notifications").then(({ updateTimerNotification }) => {
+             const activeKeys = Object.keys(newActiveTimers);
+             const taskNames = activeKeys.map(k => get().getTaskById(k)?.name || k);
+             updateTimerNotification(activeKeys.length, taskNames);
+          });
+
+          // Also need to add the session to logs
+          const logId = getLogId(taskId, date);
+          const existingLog = state.logs[logId] || {
+            id: logId,
+            taskId,
+            date,
+            value: 0,
+            completed: false,
+            sessions: [],
+          };
+          const session = { startTime: timer.startTime, endTime: Date.now() };
+          const sessions = existingLog.sessions
+            ? [...existingLog.sessions, session]
+            : [session];
+          const sessionDuration = Math.floor(
+            (session.endTime - session.startTime) / 1000,
+          ); // in seconds
+
+          const newValue = existingLog.value + sessionDuration;
+          const task = get().getTaskById(taskId);
+          const target = task?.target || 7200; // default 2 hours matching TimerScreen
+          const isCompleted = existingLog.completed || (newValue >= target);
+
+          return {
+            activeTimers: newActiveTimers,
+            logs: {
+              ...state.logs,
+              [logId]: {
+                ...existingLog,
+                sessions,
+                value: newValue,
                 completed: isCompleted,
               },
             },

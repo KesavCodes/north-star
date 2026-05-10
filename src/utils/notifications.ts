@@ -1,33 +1,38 @@
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import * as Notifications from "expo-notifications";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
 export async function scheduleDailyReminders() {
-  let permissionStatus = 'undetermined';
+  let permissionStatus = "undetermined";
 
   try {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     permissionStatus = existingStatus;
-    if (existingStatus !== 'granted') {
+    if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       permissionStatus = status;
     }
   } catch (error) {
     // In Expo SDK 53+, calling this in Expo Go on Android throws an error about remote push notifications.
     // We catch it so we can still attempt to schedule local notifications.
-    console.warn("Notification permissions warning (expected in Expo Go):", error);
-    permissionStatus = 'granted'; // Assume granted to proceed with local scheduling
+    console.warn(
+      "Notification permissions warning (expected in Expo Go):",
+      error,
+    );
+    permissionStatus = "granted"; // Assume granted to proceed with local scheduling
   }
 
-  if (permissionStatus !== 'granted') {
-    console.log('Notification permissions not granted');
+  if (permissionStatus !== "granted") {
+    console.log("Notification permissions not granted");
     return;
   }
 
@@ -43,8 +48,7 @@ export async function scheduleDailyReminders() {
     trigger: {
       hour: 8,
       minute: 0,
-      repeats: true,
-      type: Notifications.SchedulableTriggerInputTypes.DAILY
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
     },
   });
 
@@ -57,8 +61,7 @@ export async function scheduleDailyReminders() {
     trigger: {
       hour: 18,
       minute: 0,
-      repeats: true,
-      type: Notifications.SchedulableTriggerInputTypes.DAILY
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
     },
   });
 
@@ -71,8 +74,44 @@ export async function scheduleDailyReminders() {
     trigger: {
       hour: 21,
       minute: 0,
-      repeats: true,
-      type: Notifications.SchedulableTriggerInputTypes.DAILY
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
     },
   });
 }
+
+const TIMER_NOTIFICATION_ID = "active-timer-notification";
+
+export const updateTimerNotification = async (
+  activeCount: number,
+  taskNames: string[],
+) => {
+  if (activeCount === 0) {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(
+        TIMER_NOTIFICATION_ID,
+      );
+      await Notifications.dismissNotificationAsync(TIMER_NOTIFICATION_ID);
+    } catch (e) {
+      // ignore
+    }
+    return;
+  }
+
+  const title = `${activeCount} Timer${activeCount > 1 ? "s" : ""} Active`;
+  const body = taskNames.join(", ");
+
+  try {
+    await Notifications.scheduleNotificationAsync({
+      identifier: TIMER_NOTIFICATION_ID,
+      content: {
+        title,
+        body,
+        sticky: true,
+        autoDismiss: false,
+      },
+      trigger: null,
+    });
+  } catch (error) {
+    console.warn("Failed to schedule timer notification", error);
+  }
+};

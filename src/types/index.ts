@@ -42,6 +42,8 @@ export interface AppState {
   logs: Record<string, TaskLog>; // keyed by log ID
   journals: Record<string, JournalEntry>; // keyed by date YYYY-MM-DD
 
+  activeTimers: Record<string, { taskId: string; date: string; startTime: number }>; // keyed by taskId
+
   // Getters
   getTasksForDate: (date?: string) => Task[];
   getTaskById: (taskId: string) => Task | undefined;
@@ -66,6 +68,8 @@ export interface AppState {
     session: { startTime: number; endTime: number },
     completed?: boolean,
   ) => void;
+  startTimer: (taskId: string, date: string) => void;
+  pauseTimer: (taskId: string, date: string) => void;
 
   saveJournal: (entry: JournalEntry) => void;
 

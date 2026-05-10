@@ -16,12 +16,14 @@ import {
   CheckCircle2,
   Circle,
   Play,
+  Pause,
   Plus,
 } from "lucide-react-native";
 
 export const DailyTrackerScreen = ({ navigation, route }: any) => {
-  const { logs, setTaskCompleted, logTaskProgress, getTasksForDate } =
+  const { logs, setTaskCompleted, logTaskProgress, getTasksForDate, activeTimers, startTimer, pauseTimer } =
     useStore();
+  const [tick, setTick] = useState(0);
   const todayDateObj = new Date();
   const today = format(todayDateObj, "dd MMM, yyyy");
   const todayISO = format(todayDateObj, "yyyy-MM-dd");
@@ -29,6 +31,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
   const [activeCategory, setActiveCategory] = useState(
     route?.params?.category || "all",
   );
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (Object.keys(activeTimers).length > 0) {
+      interval = setInterval(() => setTick((t) => t + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [activeTimers]);
 
   // Filter tasks for today's tracker
   let activeTasks = getTasksForDate(todayISO);
@@ -157,13 +167,22 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
             {timers.map((task, index) => {
               const logId = `${task.id}-${todayISO}`;
-              const elapsed = logs[logId]?.value || 0;
+              const activeTimer = activeTimers[task.id];
+              const isRunning = !!activeTimer;
+              const baseElapsed = logs[logId]?.value || 0;
+              const currentSessionElapsed = activeTimer
+                ? Math.floor((Date.now() - activeTimer.startTime) / 1000)
+                : 0;
+              const elapsed = baseElapsed + currentSessionElapsed;
               const target = task.target || 3600;
               const progress = Math.min((elapsed / target) * 100, 100);
 
               return (
                 <View key={task.id}>
-                  <View className="py-4">
+                  <TouchableOpacity 
+                    className="py-4"
+                    onPress={() => navigation.navigate("TimerScreen", { taskId: task.id })}
+                  >
                     <View className="flex-row justify-between items-center">
                       <Text className="text-md font-semibold text-slate-700">
                         {task.name}
@@ -175,14 +194,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                           {Math.floor(target / 60)}:00
                         </Text>
                         <TouchableOpacity
-                          onPress={() =>
-                            navigation.navigate("TimerScreen", {
-                              taskId: task.id,
-                            })
-                          }
+                          onPress={() => isRunning ? pauseTimer(task.id, todayISO) : startTimer(task.id, todayISO)}
                           className="bg-[#2ECC71] w-8 h-8 rounded-full items-center justify-center"
                         >
-                          <Play color="#FFF" size={14} fill="#FFF" />
+                          {isRunning ? (
+                            <Pause color="#FFF" size={14} fill="#FFF" />
+                          ) : (
+                            <Play color="#FFF" size={14} fill="#FFF" className="ml-0.5" />
+                          )}
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -193,7 +212,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                         style={{ width: `${progress}%` }}
                       />
                     </View>
-                  </View>
+                  </TouchableOpacity>
                   {index < timers.length - 1 && (
                     <View className="h-[1px] bg-slate-100" />
                   )}

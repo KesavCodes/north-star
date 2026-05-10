@@ -10,62 +10,50 @@ import {
 } from "react-native";
 import { useStore } from "../store/useStore";
 import { format } from "date-fns";
-import {
-  ChevronLeft,
-  MoreVertical,
-  Play,
-  Pause,
-  RotateCcw,
-} from "lucide-react-native";
+import { ChevronLeft, MoreVertical, Play, Pause } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 
 export const TimerScreen = ({ route, navigation }: any) => {
   const { taskId } = route.params || {};
-  const { getTaskById, logs, addTimerSession } = useStore();
+  const { getTaskById, logs, activeTimers, startTimer, pauseTimer } =
+    useStore();
   const todayISO = format(new Date(), "yyyy-MM-dd");
 
   const task = taskId ? getTaskById(taskId) : undefined;
   const logId = taskId ? `${taskId}-${todayISO}` : null;
   const existingLog = logId ? logs[logId] : null;
 
-  const [isRunning, setIsRunning] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(existingLog?.value || 0);
-  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const activeTimer = taskId ? activeTimers[taskId] : undefined;
+  const isRunning = !!activeTimer;
+  const sessionStartTime = activeTimer?.startTime || null;
 
-  const target = task?.target || 7200; // default 2 hours
-  const progress = Math.min((elapsedSeconds / target) * 100, 100);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRunning) {
       interval = setInterval(() => {
-        setElapsedSeconds((prev) => prev + 1);
+        setTick((prev) => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [isRunning]);
 
+  const baseElapsed = existingLog?.value || 0;
+  const currentSessionElapsed = activeTimer
+    ? Math.floor((Date.now() - activeTimer.startTime) / 1000)
+    : 0;
+  const elapsedSeconds = baseElapsed + currentSessionElapsed;
+
+  const target = task?.target || 7200; // default 2 hours
+  const progress = Math.min((elapsedSeconds / target) * 100, 100);
+
   const toggleTimer = () => {
+    if (!taskId) return;
     if (isRunning) {
-      // Pause
-      setIsRunning(false);
-      if (sessionStartTime && taskId) {
-        console.log(elapsedSeconds, target);
-        addTimerSession(
-          taskId,
-          todayISO,
-          {
-            startTime: sessionStartTime,
-            endTime: Date.now(),
-          },
-          elapsedSeconds >= target ? true : false,
-        );
-      }
-      setSessionStartTime(null);
+      pauseTimer(taskId, todayISO);
     } else {
-      // Start
-      setIsRunning(true);
-      setSessionStartTime(Date.now());
+      startTimer(taskId, todayISO);
     }
   };
 
