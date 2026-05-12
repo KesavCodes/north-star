@@ -13,9 +13,11 @@ import {
 import { useStore } from "../store/useStore";
 import { format } from "date-fns";
 import { ChevronLeft, Calendar } from "lucide-react-native";
+import { useToast } from "../components/ToastProvider";
 
 export const JournalScreen = ({ navigation }: any) => {
   const { journals, saveJournal } = useStore();
+  const { showToast } = useToast();
   const today = format(new Date(), "yyyy-MM-dd");
   const displayDate = format(new Date(), "dd MMM, yyyy");
 
@@ -51,10 +53,15 @@ export const JournalScreen = ({ navigation }: any) => {
       couldImprove,
       gratefulFor,
     });
+    showToast({
+      type: "success",
+      title: "Journal Saved",
+      body: "Your daily reflection has been saved successfully.",
+    });
     // If we came from a stack push, go back. Otherwise (if tab), just show a success or do nothing.
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
+    // if (navigation.canGoBack()) {
+    //   navigation.goBack();
+    // }
   };
 
   return (
@@ -103,7 +110,7 @@ export const JournalScreen = ({ navigation }: any) => {
             value={dayInBrief}
             onChangeText={setDayInBrief}
             placeholder="A short summary of today..."
-            className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 min-h-[100px]"
+            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
             textAlignVertical="top"
           />
           <Text className="text-sm font-semibold text-slate-800 mb-3">
@@ -114,7 +121,7 @@ export const JournalScreen = ({ navigation }: any) => {
             value={wentWell}
             onChangeText={setWentWell}
             placeholder="I stayed focused on my work..."
-            className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 min-h-[100px]"
+            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
             textAlignVertical="top"
           />
           <Text className="text-sm font-semibold text-slate-800 mb-3">
@@ -125,7 +132,7 @@ export const JournalScreen = ({ navigation }: any) => {
             value={couldImprove}
             onChangeText={setCouldImprove}
             placeholder="I spent some time on social media..."
-            className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 min-h-[100px]"
+            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
             textAlignVertical="top"
           />
           <Text className="text-sm font-semibold text-slate-800 mb-3">
@@ -136,12 +143,12 @@ export const JournalScreen = ({ navigation }: any) => {
             value={gratefulFor}
             onChangeText={setGratefulFor}
             placeholder="Grateful for my family..."
-            className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 min-h-[100px]"
+            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
             textAlignVertical="top"
           />
           <TouchableOpacity
             onPress={handleSave}
-            className="bg-[#2ECC71] rounded-2xl py-4 items-center justify-center mb-8 shadow-sm"
+            className="bg-[#2ECC71] rounded-2xl mt-1 py-4 items-center justify-center mb-8 shadow-sm"
           >
             <Text className="text-white font-bold text-base">
               Save Reflection

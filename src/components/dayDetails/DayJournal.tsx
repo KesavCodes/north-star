@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useStore } from "../../store/useStore";
+import { useToast } from "../ToastProvider";
 
 interface Props {
   date: string; // YYYY-MM-DD
@@ -41,6 +42,7 @@ const FIELDS: {
 
 export const DayJournal = ({ date }: Props) => {
   const { journals, saveJournal } = useStore();
+  const { showToast } = useToast();
   const existing = journals[date];
 
   const [values, setValues] = useState({
@@ -53,7 +55,14 @@ export const DayJournal = ({ date }: Props) => {
   const handleChange = (key: keyof typeof values, text: string) =>
     setValues((prev) => ({ ...prev, [key]: text }));
 
-  const handleSave = () => saveJournal({ date, ...values });
+  const handleSave = () => {
+    saveJournal({ date, ...values });
+    showToast({
+      type: "success",
+      title: "Journal Saved",
+      body: "Your daily reflection has been saved successfully.",
+    });
+  };
 
   return (
     <ScrollView
