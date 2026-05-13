@@ -77,7 +77,7 @@ export const NotificationsScreen = ({ navigation }: any) => {
             </Text>
           </TouchableOpacity>
         ) : (
-          <View className="w-16" />
+          <View className="w-10" />
         )}
       </View>
 
