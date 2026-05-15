@@ -173,7 +173,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
   const { start, end } = getRange(tab);
   const { start: prevStart, end: prevEnd } = getPrevRange(tab);
   const buckets = buildBuckets(tab);
-  console.log(start, end, buckets);
+  // console.log(start, end, buckets);
 
   // Logs filtered to current range
   const logsInRange = useMemo(() => {

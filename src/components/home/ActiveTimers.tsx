@@ -4,6 +4,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Pause } from "lucide-react-native";
 import { useStore } from "../../store/useStore";
 
+const ACCENT = "#2ECC71";
+
 const ActiveTimers = () => {
   const navigation = useNavigation<any>();
   const { activeTimers, logs, getTaskById, pauseTimer } = useStore();
@@ -26,14 +28,17 @@ const ActiveTimers = () => {
       </Text>
 
       {activeKeys.length === 0 ? (
-        <View className="bg-white rounded-3xl p-6 border border-dashed border-slate-300 items-center justify-center shadow-sm">
+        <View 
+          key="empty"
+          className="bg-white rounded-3xl p-6 border border-dashed border-slate-300 items-center justify-center shadow-sm"
+        >
           <Text className="text-slate-500 font-medium text-center leading-6">
             No timers active right now. Start a task from your daily tracker to
             see it here!
           </Text>
         </View>
       ) : (
-        <View className="gap-4">
+        <View key="list" className="gap-4">
           {activeKeys.map((taskId) => {
             const timer = activeTimers[taskId];
             const task = getTaskById(taskId);
@@ -55,10 +60,13 @@ const ActiveTimers = () => {
               <TouchableOpacity
                 key={taskId}
                 onPress={() => navigation.navigate("TimerScreen", { taskId })}
-                className="bg-[#1E293B] rounded-3xl p-4 flex-row items-center justify-between shadow-md"
+                className="bg-slate-800 rounded-3xl p-4 flex-row items-center justify-between shadow-md"
               >
                 <View className="flex-row items-center flex-1 mr-4">
-                  <View className="w-2 h-10 bg-[#2ECC71] rounded-full mr-4" />
+                  <View
+                    className="w-2 h-10 rounded-full mr-4"
+                    style={{ backgroundColor: ACCENT }}
+                  />
                   <View className="flex-1">
                     <Text
                       className="text-white font-semibold text-base"
@@ -74,7 +82,8 @@ const ActiveTimers = () => {
 
                 <TouchableOpacity
                   onPress={() => pauseTimer(taskId, timer.date)}
-                  className="bg-[#2ECC71] w-12 h-12 rounded-full items-center justify-center"
+                  className="w-12 h-12 rounded-full items-center justify-center"
+                  style={{ backgroundColor: ACCENT }}
                 >
                   <Pause color="#FFF" size={24} fill="#FFF" />
                 </TouchableOpacity>

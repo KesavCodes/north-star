@@ -105,3 +105,15 @@ Timers are managed globally so they can continue running even if the user naviga
   - **`ToastProvider` (`src/components/ToastProvider.tsx`)**: Wraps the root of the app in `App.tsx` and manages the queue of active toasts. It overlays them on top of all other screens using absolute positioning.
   - **`Toast` (`src/components/Toast.tsx`)**: The individual UI element that slides and fades in. Supports types like `success`, `error`, `warning`, and `info`.
   - **Usage**: Any screen or component can call `const { showToast } = useToast();` to trigger a toast notification.
+
+---
+
+## 6. NativeWind & React Navigation Quirks
+
+**The `printUpgradeWarning` Context Crash**
+When conditionally rendering NativeWind components (e.g., swapping a `<View className="a">` with `<View className="b">` via a ternary operator), React will recycle the Fiber node if the component types match. NativeWind intercepts this massive `className` prop change as a "dynamic style upgrade" and triggers its `printUpgradeWarning`.
+
+To generate this warning, NativeWind serializes the component's `props`, which includes `children`. In DEV mode, children contain `_owner` Fiber nodes pointing to the entire React tree. The serializer traverses this tree, eventually hitting React Navigation's `NavigationStateContext` default value, invoking `getKey()`, and crashing the app with: `Couldn't find a navigation context.`
+
+**The Rule:**
+If you conditionally swap sibling components of the same type that use NativeWind `className`s, **always provide explicit, unique `key` props** (e.g., `<View key="empty">` vs `<View key="list">`). This forces React to unmount/remount the components rather than recycling them, bypassing the dangerous NativeWind upgrade warning completely.
