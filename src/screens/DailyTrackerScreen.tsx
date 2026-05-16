@@ -21,8 +21,15 @@ import {
 } from "lucide-react-native";
 
 export const DailyTrackerScreen = ({ navigation, route }: any) => {
-  const { logs, setTaskCompleted, logTaskProgress, getTasksForDate, activeTimers, startTimer, pauseTimer } =
-    useStore();
+  const {
+    logs,
+    setTaskCompleted,
+    logTaskProgress,
+    getTasksForDate,
+    activeTimers,
+    startTimer,
+    pauseTimer,
+  } = useStore();
   const [tick, setTick] = useState(0);
   const todayDateObj = new Date();
   const today = format(todayDateObj, "dd MMM, yyyy");
@@ -71,33 +78,55 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
           </Text>
           <Text className="text-xs text-slate-500">{today}</Text>
         </View>
-        <TouchableOpacity className="p-2 -mr-2">
+        <TouchableOpacity
+          className="p-2 -mr-2"
+          onPress={() => navigation.navigate("CalendarHeatmap")}
+        >
           <Calendar color="#334155" size={24} />
         </TouchableOpacity>
       </View>
 
       {/* Categories Nav */}
-      <View className="flex-row px-5 mt-6 gap-2">
-        {["all", "discipline", "kindness"].map((cat) => {
-          const isActive = activeCategory === cat;
-          return (
-            <TouchableOpacity
-              key={cat}
-              onPress={() => setActiveCategory(cat)}
-              className={`py-2 rounded-full ${
-                isActive ? "bg-slate-800" : "bg-white border border-slate-200"
+      <View className="px-5 mt-6 pb-2">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity
+            onPress={() => setActiveCategory("all")}
+            className={`py-2 px-6 rounded-full mr-2 ${
+              activeCategory === "all"
+                ? "bg-slate-800"
+                : "bg-white border border-slate-200"
+            }`}
+          >
+            <Text
+              className={`font-semibold capitalize ${
+                activeCategory === "all" ? "text-white" : "text-slate-600"
               }`}
             >
-              <Text
-                className={`font-semibold px-6 capitalize ${
-                  isActive ? "text-white" : "text-slate-600"
+              All
+            </Text>
+          </TouchableOpacity>
+
+          {useStore((state) => state.categories).map((cat) => {
+            const isActive = activeCategory === cat.id;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => setActiveCategory(cat.id)}
+                className={`py-2 px-6 rounded-full mr-2 ${
+                  isActive ? "bg-slate-800" : "bg-white border border-slate-200"
                 }`}
               >
-                {cat}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                <Text
+                  className={`font-semibold capitalize ${
+                    isActive ? "text-white" : "text-slate-600"
+                  }`}
+                >
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <ScrollView
@@ -179,9 +208,11 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
               return (
                 <View key={task.id}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     className="py-4"
-                    onPress={() => navigation.navigate("TimerScreen", { taskId: task.id })}
+                    onPress={() =>
+                      navigation.navigate("TimerScreen", { taskId: task.id })
+                    }
                   >
                     <View className="flex-row justify-between items-center">
                       <Text className="text-md font-semibold text-slate-700">
@@ -194,13 +225,22 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                           {Math.floor(target / 60)}:00
                         </Text>
                         <TouchableOpacity
-                          onPress={() => isRunning ? pauseTimer(task.id, todayISO) : startTimer(task.id, todayISO)}
+                          onPress={() =>
+                            isRunning
+                              ? pauseTimer(task.id, todayISO)
+                              : startTimer(task.id, todayISO)
+                          }
                           className="bg-[#2ECC71] w-8 h-8 rounded-full items-center justify-center"
                         >
                           {isRunning ? (
                             <Pause color="#FFF" size={14} fill="#FFF" />
                           ) : (
-                            <Play color="#FFF" size={14} fill="#FFF" className="ml-0.5" />
+                            <Play
+                              color="#FFF"
+                              size={14}
+                              fill="#FFF"
+                              className="ml-0.5"
+                            />
                           )}
                         </TouchableOpacity>
                       </View>

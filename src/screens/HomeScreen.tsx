@@ -40,10 +40,10 @@ export const HomeScreen = () => {
     <ScreenWrapper className="flex-1 bg-[#F8F9FA]">
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className="flex-row justify-between items-center mt-4">
-          <TouchableOpacity className="p-2 -ml-2">
+        <View className="flex-row justify-end items-center mt-4">
+          {/* <TouchableOpacity className="p-2 -ml-2">
             <Menu color="#334155" size={24} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             className="p-2 -mr-2"
             onPress={() => navigation.navigate("Notifications")}

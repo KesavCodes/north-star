@@ -103,7 +103,10 @@ export const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <View className="h-[1px] bg-slate-800 ml-12" />
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          <TouchableOpacity 
+            onPress={() => navigation.navigate("ManageCategoriesScreen")}
+            className="flex-row items-center justify-between p-4"
+          >
             <View className="flex-row items-center">
               <Folder color="#94A3B8" size={20} />
               <Text className="text-white ml-4 text-base">Categories</Text>

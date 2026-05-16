@@ -10,6 +10,10 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       userInfo: null,
+      categories: [
+        { id: "discipline", name: "Discipline", color: "#2ECC71", emoji: "💚" },
+        { id: "kindness", name: "Kindness", color: "#F39C12", emoji: "❤️" }
+      ],
       tasks: { routine: [] },
       logs: {},
       journals: {},
@@ -42,6 +46,26 @@ export const useStore = create<AppState>()(
       },
 
       setUserInfo: (info) => set({ userInfo: info }),
+
+      addCategory: (categoryData) =>
+        set((state) => ({
+          categories: [
+            ...state.categories,
+            { ...categoryData, id: generateId() },
+          ],
+        })),
+
+      updateCategory: (id, updates) =>
+        set((state) => ({
+          categories: state.categories.map((c) =>
+            c.id === id ? { ...c, ...updates } : c
+          ),
+        })),
+
+      deleteCategory: (id) =>
+        set((state) => ({
+          categories: state.categories.filter((c) => c.id !== id),
+        })),
 
       addTask: (taskData) =>
         set((state) => {

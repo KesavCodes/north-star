@@ -1,5 +1,12 @@
 export type TaskType = "checkbox" | "timer" | "counter";
-export type TaskCategory = "discipline" | "kindness";
+export type TaskCategory = string; // categoryId
+
+export interface Category {
+  id: string;
+  name: string;
+  color: string;
+  emoji: string;
+}
 
 export interface Task {
   id: string;
@@ -38,6 +45,7 @@ export interface UserInfo {
 
 export interface AppState {
   userInfo: UserInfo | null;
+  categories: Category[];
   tasks: Record<string, Task[]>; // keyed by date YYYY-MM-DD or 'routine'
   logs: Record<string, TaskLog>; // keyed by log ID
   journals: Record<string, JournalEntry>; // keyed by date YYYY-MM-DD
@@ -51,6 +59,13 @@ export interface AppState {
 
   // Actions
   setUserInfo: (info: UserInfo) => void;
+  
+  // Category Actions
+  addCategory: (category: Omit<Category, "id">) => void;
+  updateCategory: (id: string, updates: Partial<Category>) => void;
+  deleteCategory: (id: string) => void;
+
+  // Task Actions
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;

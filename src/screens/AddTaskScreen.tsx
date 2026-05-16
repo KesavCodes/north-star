@@ -209,35 +209,26 @@ export const AddTaskScreen = ({ navigation }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Category
         </Text>
-        <View className="flex-row space-x-4 mb-6 gap-2">
-          <TouchableOpacity
-            onPress={() => setCategory("discipline")}
-            className={`flex-1 flex-row items-center justify-center p-3 rounded-2xl border ${category === "discipline" ? "border-[#2ECC71] bg-[#E8F8F5]" : "border-slate-200 bg-white"}`}
-          >
-            <ShieldCheck
-              color={category === "discipline" ? "#2ECC71" : "#94A3B8"}
-              size={18}
-            />
-            <Text
-              className={`ml-2 font-medium ${category === "discipline" ? "text-[#2ECC71]" : "text-slate-500"}`}
+        <View className="flex-row flex-wrap gap-2 mb-6">
+          {useStore((state) => state.categories).map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              onPress={() => setCategory(cat.id)}
+              className="flex-row items-center justify-center px-4 py-3 rounded-2xl border"
+              style={{
+                borderColor: category === cat.id ? cat.color : "#e2e8f0",
+                backgroundColor: category === cat.id ? cat.color + "15" : "#fff",
+              }}
             >
-              Discipline
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setCategory("kindness")}
-            className={`flex-1 flex-row items-center justify-center p-3 rounded-2xl border ${category === "kindness" ? "border-[#F39C12] bg-[#FEF5E7]" : "border-slate-200 bg-white"}`}
-          >
-            <Heart
-              color={category === "kindness" ? "#F39C12" : "#94A3B8"}
-              size={18}
-            />
-            <Text
-              className={`ml-2 font-medium ${category === "kindness" ? "text-[#F39C12]" : "text-slate-500"}`}
-            >
-              Kindness
-            </Text>
-          </TouchableOpacity>
+              <Text className="text-lg mr-2">{cat.emoji}</Text>
+              <Text
+                className={`font-medium`}
+                style={{ color: category === cat.id ? cat.color : "#64748b" }}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Daily Target */}

@@ -31,7 +31,7 @@ import {
 import { Task } from "../types";
 
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
-  const { logs, getTasksForDate } = useStore();
+  const { logs, getTasksForDate, categories } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const monthStart = startOfMonth(currentDate);
@@ -108,11 +108,13 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
       return { current, best };
     };
 
-    return {
-      discipline: calc("discipline"),
-      kindness: calc("kindness"),
-    };
-  }, [logs, getTasksForDate]);
+    const categoryStreaks: Record<string, { current: number; best: number }> =
+      {};
+    categories.forEach((cat) => {
+      categoryStreaks[cat.id] = calc(cat.id);
+    });
+    return categoryStreaks;
+  }, [logs, getTasksForDate, categories]);
 
   const getDayColor = (dateStr: string) => {
     const currentDateStr = format(new Date(), "yyyy-MM-dd");
@@ -248,43 +250,38 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
           <Text className="text-base font-bold text-slate-800 mb-4 px-1">
             Current Streaks
           </Text>
-          <View className="flex-row space-x-4">
-            <View className="flex-1 bg-white rounded-3xl p-5 shadow-sm border border-slate-50 mr-2">
-              <Text className="text-sm font-bold text-[#F39C12] mb-4">
-                Discipline
-              </Text>
-              <View className="flex-row items-center mb-2">
-                <Flame color="#F39C12" size={28} fill="#F39C12" />
-                <Text className="text-3xl font-bold text-slate-800 ml-2">
-                  {streaks.discipline.current}{" "}
-                  <Text className="text-base text-slate-500 font-medium">
-                    days
-                  </Text>
-                </Text>
-              </View>
-              <Text className="text-xs text-slate-400">
-                Best: {streaks.discipline.best} days
-              </Text>
+          <ScrollView showsHorizontalScrollIndicator={false}>
+            <View className="flex-wrap w-full flex-row justify-between">
+              {categories.map((cat) => {
+                const streak = streaks[cat.id] || { current: 0, best: 0 };
+                return (
+                  <View
+                    key={cat.id}
+                    className="bg-white mb-3 w-[49%] rounded-3xl p-5 shadow-sm border border-slate-50"
+                  >
+                    <Text
+                      className="text-sm font-bold mb-4"
+                      style={{ color: cat.color }}
+                    >
+                      {cat.name}
+                    </Text>
+                    <View className="flex-row items-center mb-2">
+                      <Text className="text-2xl mr-2">{cat.emoji}</Text>
+                      <Text className="text-3xl font-bold text-slate-800">
+                        {streak.current}{" "}
+                        <Text className="text-base text-slate-500 font-medium">
+                          days
+                        </Text>
+                      </Text>
+                    </View>
+                    <Text className="text-xs text-slate-400">
+                      Best: {streak.best} days
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
-
-            <View className="flex-1 bg-white rounded-3xl p-5 shadow-sm border border-slate-50 ml-2">
-              <Text className="text-sm font-bold text-[#E74C3C] mb-4">
-                Kindness
-              </Text>
-              <View className="flex-row items-center mb-2">
-                <Heart color="#E74C3C" size={28} fill="#E74C3C" />
-                <Text className="text-3xl font-bold text-slate-800 ml-2">
-                  {streaks.kindness.current}{" "}
-                  <Text className="text-base text-slate-500 font-medium">
-                    days
-                  </Text>
-                </Text>
-              </View>
-              <Text className="text-xs text-slate-400">
-                Best: {streaks.kindness.best} days
-              </Text>
-            </View>
-          </View>
+          </ScrollView>
         </View>
       </ScrollView>
     </SafeAreaView>
