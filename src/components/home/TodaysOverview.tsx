@@ -115,9 +115,10 @@ const TodaysOverview = () => {
   const todayISO = format(new Date(), "yyyy-MM-dd");
   const activeTasks = getTasksForDate(todayISO);
 
+  const activeCategories = categories.filter((c) => !c.isArchived);
   const displayCategories =
-    categories.length > 4 ? categories.slice(0, 3) : categories;
-  const showAllButton = categories.length > 4;
+    activeCategories.length > 4 ? activeCategories.slice(0, 3) : activeCategories;
+  const showAllButton = activeCategories.length > 4;
 
   return (
     <View className="mt-8">

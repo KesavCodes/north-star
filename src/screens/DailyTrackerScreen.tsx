@@ -29,6 +29,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
     activeTimers,
     startTimer,
     pauseTimer,
+    categories,
   } = useStore();
   const [tick, setTick] = useState(0);
   const todayDateObj = new Date();
@@ -51,6 +52,9 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
   let activeTasks = getTasksForDate(todayISO);
   if (activeCategory !== "all") {
     activeTasks = activeTasks.filter((t) => t.category === activeCategory);
+  } else {
+    const archivedCategoryIds = categories.filter(c => c.isArchived).map(c => c.id);
+    activeTasks = activeTasks.filter((t) => !archivedCategoryIds.includes(t.category));
   }
 
   const habits = activeTasks.filter((t) => t.type === "checkbox");
@@ -106,7 +110,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
             </Text>
           </TouchableOpacity>
 
-          {useStore((state) => state.categories).map((cat) => {
+          {useStore((state) => state.categories).filter((c) => !c.isArchived).map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
               <TouchableOpacity

@@ -210,7 +210,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
           Category
         </Text>
         <View className="flex-row flex-wrap gap-2 mb-6">
-          {useStore((state) => state.categories).map((cat) => (
+          {useStore((state) => state.categories).filter(c => !c.isArchived).map((cat) => (
             <TouchableOpacity
               key={cat.id}
               onPress={() => setCategory(cat.id)}

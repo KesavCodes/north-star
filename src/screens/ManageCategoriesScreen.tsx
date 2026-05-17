@@ -9,12 +9,18 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { ChevronLeft, Plus, Trash2 } from "lucide-react-native";
+import {
+  ChevronLeft,
+  Plus,
+  Trash2,
+  Archive,
+  ArchiveRestore,
+} from "lucide-react-native";
 import { useStore } from "../store/useStore";
 import { useToast } from "../components/ToastProvider";
 
 export const ManageCategoriesScreen = ({ navigation }: any) => {
-  const { categories, deleteCategory, tasks } = useStore();
+  const { categories, deleteCategory, tasks, updateCategory } = useStore();
   const { showToast } = useToast();
 
   const handleDelete = (categoryId: string, categoryName: string) => {
@@ -30,7 +36,7 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
     if (isInUse) {
       showToast({
         title: "Category in use",
-        body: `Cannot delete "${categoryName}" because it has associated tasks.`,
+        body: `Cannot delete "${categoryName}" because it has associated tasks. You can archive it instead.`,
         type: "error",
       });
       return;
@@ -86,6 +92,7 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
       <ScrollView
         className="flex-1 px-5 mt-6"
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View className="bg-white rounded-3xl p-2 shadow-sm border border-slate-50">
           {categories.map((category, index) => (
@@ -94,23 +101,45 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
                 <View className="flex-row items-center flex-1">
                   <View
                     className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: category.color + "20" }}
+                    style={{
+                      backgroundColor:
+                        category.color + (category.isArchived ? "10" : "20"),
+                      opacity: category.isArchived ? 0.5 : 1,
+                    }}
                   >
                     <Text className="text-lg">{category.emoji}</Text>
                   </View>
-                  <Text className="text-base font-semibold text-slate-800">
+                  <Text
+                    className={`text-base font-semibold ${category.isArchived ? "text-slate-400 line-through" : "text-slate-800"}`}
+                  >
                     {category.name}
                   </Text>
                 </View>
 
                 {/* Prevent deleting default categories for safety, or let user delete if not in use? 
                     Let's allow deleting any category as long as it's not in use. */}
-                <TouchableOpacity
-                  onPress={() => handleDelete(category.id, category.name)}
-                  className="p-2 bg-red-50 rounded-full"
-                >
-                  <Trash2 color="#EF4444" size={18} />
-                </TouchableOpacity>
+                <View className="flex-row items-center">
+                  <TouchableOpacity
+                    onPress={() =>
+                      updateCategory(category.id, {
+                        isArchived: !category.isArchived,
+                      })
+                    }
+                    className={`p-2 rounded-full mr-2 ${category.isArchived ? "bg-indigo-50" : "bg-slate-50"}`}
+                  >
+                    {category.isArchived ? (
+                      <ArchiveRestore color="#6366F1" size={18} />
+                    ) : (
+                      <Archive color="#64748b" size={18} />
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(category.id, category.name)}
+                    className="p-2 bg-red-50 rounded-full"
+                  >
+                    <Trash2 color="#EF4444" size={18} />
+                  </TouchableOpacity>
+                </View>
               </View>
               {index < categories.length - 1 && (
                 <View className="h-[1px] bg-slate-100 mx-4" />
@@ -124,6 +153,19 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
           )}
         </View>
       </ScrollView>
+
+      {/* Bottom Fixed Button */}
+      <View className="absolute bottom-2 left-0 right-0 p-5 bg-[#F8F9FA] border-t border-slate-100 pb-8">
+        <TouchableOpacity
+          onPress={() => navigation.navigate("AddCategoryScreen")}
+          className="bg-slate-800 rounded-2xl py-4 flex-row items-center justify-center"
+        >
+          <Plus color="#FFF" size={20} />
+          <Text className="text-white font-semibold text-base ml-2">
+            Add Category
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

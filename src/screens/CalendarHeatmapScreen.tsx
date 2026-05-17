@@ -45,12 +45,14 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
     end: endDate,
   });
 
+  const archivedCategoryIds = useMemo(() => categories.filter(c => c.isArchived).map(c => c.id), [categories]);
+
   const monthlyTaskData = eachDayOfInterval({
     start: monthStart,
     end: monthEnd,
   }).reduce((acc: any, day) => {
     const dateStr = format(day, "yyyy-MM-dd");
-    acc[dateStr] = getTasksForDate(dateStr);
+    acc[dateStr] = getTasksForDate(dateStr).filter((t: Task) => !archivedCategoryIds.includes(t.category));
     return acc;
   }, {});
 
@@ -110,7 +112,7 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
 
     const categoryStreaks: Record<string, { current: number; best: number }> =
       {};
-    categories.forEach((cat) => {
+    categories.filter(c => !c.isArchived).forEach((cat) => {
       categoryStreaks[cat.id] = calc(cat.id);
     });
     return categoryStreaks;
@@ -252,7 +254,7 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
           </Text>
           <ScrollView showsHorizontalScrollIndicator={false}>
             <View className="flex-wrap w-full flex-row justify-between">
-              {categories.map((cat) => {
+              {categories.filter(c => !c.isArchived).map((cat) => {
                 const streak = streaks[cat.id] || { current: 0, best: 0 };
                 return (
                   <View
