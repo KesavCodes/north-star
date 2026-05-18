@@ -18,6 +18,7 @@ import {
   ArrowDown,
   X,
   ArrowUpDown,
+  Check,
 } from "lucide-react-native";
 
 const OverviewCard = ({
@@ -97,6 +98,11 @@ const OverviewCard = ({
               transform="rotate(-90 20 20)"
             />
           </Svg>
+          {percentage === 100 && (
+            <View className="absolute inset-0 items-center justify-center">
+              <Check size={18} color={category.color} strokeWidth={4} />
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
