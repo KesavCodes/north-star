@@ -67,6 +67,11 @@ export const useStore = create<AppState>()(
           categories: state.categories.filter((c) => c.id !== id),
         })),
 
+      reorderCategories: (categories) =>
+        set(() => ({
+          categories,
+        })),
+
       addTask: (taskData) =>
         set((state) => {
           const newTask = {

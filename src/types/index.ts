@@ -65,6 +65,7 @@ export interface AppState {
   addCategory: (category: Omit<Category, "id">) => void;
   updateCategory: (id: string, updates: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
+  reorderCategories: (categories: Category[]) => void;
 
   // Task Actions
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;

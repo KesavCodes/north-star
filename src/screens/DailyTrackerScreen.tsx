@@ -18,6 +18,7 @@ import {
   Play,
   Pause,
   Plus,
+  Minus,
 } from "lucide-react-native";
 
 export const DailyTrackerScreen = ({ navigation, route }: any) => {
@@ -53,8 +54,12 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
   if (activeCategory !== "all") {
     activeTasks = activeTasks.filter((t) => t.category === activeCategory);
   } else {
-    const archivedCategoryIds = categories.filter(c => c.isArchived).map(c => c.id);
-    activeTasks = activeTasks.filter((t) => !archivedCategoryIds.includes(t.category));
+    const archivedCategoryIds = categories
+      .filter((c) => c.isArchived)
+      .map((c) => c.id);
+    activeTasks = activeTasks.filter(
+      (t) => !archivedCategoryIds.includes(t.category),
+    );
   }
 
   const habits = activeTasks.filter((t) => t.type === "checkbox");
@@ -110,26 +115,30 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
             </Text>
           </TouchableOpacity>
 
-          {useStore((state) => state.categories).filter((c) => !c.isArchived).map((cat) => {
-            const isActive = activeCategory === cat.id;
-            return (
-              <TouchableOpacity
-                key={cat.id}
-                onPress={() => setActiveCategory(cat.id)}
-                className={`py-2 px-6 rounded-full mr-2 ${
-                  isActive ? "bg-slate-800" : "bg-white border border-slate-200"
-                }`}
-              >
-                <Text
-                  className={`font-semibold capitalize ${
-                    isActive ? "text-white" : "text-slate-600"
+          {useStore((state) => state.categories)
+            .filter((c) => !c.isArchived)
+            .map((cat) => {
+              const isActive = activeCategory === cat.id;
+              return (
+                <TouchableOpacity
+                  key={cat.id}
+                  onPress={() => setActiveCategory(cat.id)}
+                  className={`py-2 px-6 rounded-full mr-2 ${
+                    isActive
+                      ? "bg-slate-800"
+                      : "bg-white border border-slate-200"
                   }`}
                 >
-                  {cat.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <Text
+                    className={`font-semibold capitalize ${
+                      isActive ? "text-white" : "text-slate-600"
+                    }`}
+                  >
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
         </ScrollView>
       </View>
 
@@ -288,7 +297,8 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
               const value = logs[logId]?.value || 0;
               const target = task.target || 1;
               const progress = Math.min((value / target) * 100, 100);
-              const isCompleted = value + 1 >= target;
+              const isCompletedForPlus = value + 1 >= target;
+              const isCompletedForMinus = value - 1 >= target;
               return (
                 <View key={task.id}>
                   <View className="py-4">
@@ -301,8 +311,29 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                           {value} / {target}
                         </Text>
                         <TouchableOpacity
+                          key="minus"
+                          disabled={value <= 0}
                           onPress={() =>
-                            logTaskProgress(task.id, todayISO, 1, isCompleted)
+                            logTaskProgress(
+                              task.id,
+                              todayISO,
+                              -1,
+                              isCompletedForMinus,
+                            )
+                          }
+                          className={`mr-2 w-8 h-8 rounded-full items-center justify-center ${value <= 0 ? "bg-slate-200" : "bg-red-500"}`}
+                        >
+                          <Minus color="#FFF" size={16} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          key="plus"
+                          onPress={() =>
+                            logTaskProgress(
+                              task.id,
+                              todayISO,
+                              1,
+                              isCompletedForPlus,
+                            )
                           }
                           className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center"
                         >
