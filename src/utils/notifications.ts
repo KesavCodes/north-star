@@ -115,3 +115,48 @@ export const updateTimerNotification = async (
     console.warn("Failed to schedule timer notification", error);
   }
 };
+
+export async function scheduleTaskReminder(taskId: string, taskName: string, time: string, date?: string) {
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+
+  try {
+    if (date) {
+      // One-time task
+      const [year, month, day] = date.split("-").map(Number);
+      const triggerDate = new Date(year, month - 1, day, hour, minute);
+      
+      // Only schedule if it's in the future
+      if (triggerDate.getTime() > Date.now()) {
+        await Notifications.scheduleNotificationAsync({
+          identifier: `task-reminder-${taskId}`,
+          content: {
+            title: "Task Reminder",
+            body: `It's time to work on: ${taskName}`,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: triggerDate,
+          },
+        });
+      }
+    } else {
+      // Routine task (Daily)
+      await Notifications.scheduleNotificationAsync({
+        identifier: `task-reminder-${taskId}`,
+        content: {
+          title: "Routine Reminder",
+          body: `It's time for your routine: ${taskName}`,
+        },
+        trigger: {
+          hour,
+          minute,
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        },
+      });
+    }
+  } catch (error) {
+    console.warn("Failed to schedule task reminder notification", error);
+  }
+}

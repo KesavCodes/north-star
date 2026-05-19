@@ -83,6 +83,13 @@ export const useStore = create<AppState>()(
             ? "routine"
             : taskData.date || "routine";
           const list = state.tasks[key] || [];
+
+          if (newTask.reminderTime) {
+            import("../utils/notifications").then(({ scheduleTaskReminder }) => {
+              scheduleTaskReminder(newTask.id, newTask.name, newTask.reminderTime!, newTask.date);
+            });
+          }
+
           return {
             tasks: {
               ...state.tasks,

@@ -13,11 +13,13 @@ const TimePickerDropdown = ({
   minutes,
   onHoursChange,
   onMinutesChange,
+  title = "Set Target Duration",
 }: {
   hours: string;
   minutes: string;
   onHoursChange: (h: string) => void;
   onMinutesChange: (m: string) => void;
+  title?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hoursRef = useRef<ScrollView>(null);
@@ -76,7 +78,7 @@ const TimePickerDropdown = ({
         >
           <View className="bg-white rounded-3xl w-5/6 h-[400px] overflow-hidden shadow-2xl p-6">
             <Text className="text-center font-bold text-slate-800 text-xl mb-6">
-              Set Target Duration
+              {title}
             </Text>
 
             <View className="flex-row justify-between flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-100 gap-1">

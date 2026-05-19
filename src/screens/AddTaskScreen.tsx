@@ -39,6 +39,13 @@ export const AddTaskScreen = ({ navigation }: any) => {
   const [targetDurationMinutes, setTargetDurationMinutes] = useState("00");
   const [targetCount, setTargetCount] = useState("1");
   const [selectedColor, setSelectedColor] = useState("#2ECC71");
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderHours, setReminderHours] = useState(
+    new Date().getHours().toString().padStart(2, "0")
+  );
+  const [reminderMinutes, setReminderMinutes] = useState(
+    new Date().getMinutes().toString().padStart(2, "0")
+  );
 
   const colors = [
     "#2ECC71",
@@ -75,6 +82,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
       isRoutine,
       date: isRoutine ? undefined : format(new Date(), "yyyy-MM-dd"),
       target,
+      reminderTime: reminderEnabled ? `${reminderHours}:${reminderMinutes}` : undefined,
       color: selectedColor,
       icon: "star", // dummy icon for now
     });
@@ -210,25 +218,28 @@ export const AddTaskScreen = ({ navigation }: any) => {
           Category
         </Text>
         <View className="flex-row flex-wrap gap-2 mb-6">
-          {useStore((state) => state.categories).filter(c => !c.isArchived).map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              onPress={() => setCategory(cat.id)}
-              className="flex-row items-center justify-center px-4 py-3 rounded-2xl border"
-              style={{
-                borderColor: category === cat.id ? cat.color : "#e2e8f0",
-                backgroundColor: category === cat.id ? cat.color + "15" : "#fff",
-              }}
-            >
-              <Text className="text-lg mr-2">{cat.emoji}</Text>
-              <Text
-                className={`font-medium`}
-                style={{ color: category === cat.id ? cat.color : "#64748b" }}
+          {useStore((state) => state.categories)
+            .filter((c) => !c.isArchived)
+            .map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => setCategory(cat.id)}
+                className="flex-row items-center justify-center px-4 py-3 rounded-2xl border"
+                style={{
+                  borderColor: category === cat.id ? cat.color : "#e2e8f0",
+                  backgroundColor:
+                    category === cat.id ? cat.color + "15" : "#fff",
+                }}
               >
-                {cat.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text className="text-lg mr-2">{cat.emoji}</Text>
+                <Text
+                  className={`font-medium`}
+                  style={{ color: category === cat.id ? cat.color : "#64748b" }}
+                >
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
         </View>
 
         {/* Daily Target */}
@@ -278,13 +289,36 @@ export const AddTaskScreen = ({ navigation }: any) => {
         </View>
 
         {/* Reminder (Optional) */}
-        {/* <Text className="text-sm font-semibold text-slate-800 mb-3">
-          Reminder (Optional)
-        </Text>
-        <TouchableOpacity className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center">
-          <Text className="text-slate-400">Add reminder</Text>
-          <ChevronRight color="#CBD5E1" size={20} />
-        </TouchableOpacity> */}
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-sm font-semibold text-slate-800">
+            Reminder (Optional)
+          </Text>
+          {reminderEnabled && (
+            <TouchableOpacity onPress={() => setReminderEnabled(false)}>
+              <Text className="text-red-500 font-medium">Remove</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {reminderEnabled ? (
+          <View className="mb-12">
+            <TimePickerDropdown
+              title="Set Reminder Time"
+              hours={reminderHours}
+              minutes={reminderMinutes}
+              onHoursChange={setReminderHours}
+              onMinutesChange={setReminderMinutes}
+            />
+          </View>
+        ) : (
+          <TouchableOpacity 
+            onPress={() => setReminderEnabled(true)}
+            className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center"
+          >
+            <Text className="text-slate-400">Add reminder</Text>
+            <ChevronRight color="#CBD5E1" size={20} />
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

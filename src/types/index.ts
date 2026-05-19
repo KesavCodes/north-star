@@ -17,6 +17,7 @@ export interface Task {
   isRoutine: boolean;
   date?: string; // YYYY-MM-DD for one-time tasks
   target?: number; // duration in seconds for timer, value for counter
+  reminderTime?: string; // HH:MM format
   icon?: string;
   color?: string;
   createdAt: number;
