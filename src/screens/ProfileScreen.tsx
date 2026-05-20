@@ -22,7 +22,7 @@ import {
   LogOut,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Image } from 'react-native';
+import { Image } from "react-native";
 
 export const ProfileScreen = ({ navigation }: any) => {
   const { importData, userInfo } = useStore();
@@ -66,12 +66,8 @@ export const ProfileScreen = ({ navigation }: any) => {
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4 mb-8">
-        <View className="w-8" />
+      <View className="flex-row justify-center items-center px-5 mt-4 mb-8">
         <Text className="text-lg font-bold text-white">Profile</Text>
-        <TouchableOpacity className="p-2 -mr-2">
-          <Settings color="#FFF" size={24} />
-        </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -79,13 +75,20 @@ export const ProfileScreen = ({ navigation }: any) => {
         <View className="flex-row items-center mb-10">
           <View className="w-16 h-16 rounded-full bg-[#2ECC71] items-center justify-center mr-4 overflow-hidden border border-slate-700">
             {userInfo?.profilePic ? (
-               <Image source={{ uri: userInfo.profilePic }} className="w-full h-full" />
+              <Image
+                source={{ uri: userInfo.profilePic }}
+                className="w-full h-full"
+              />
             ) : (
-               <Text className="text-white text-2xl font-bold">{userInfo?.name?.charAt(0).toUpperCase() || 'U'}</Text>
+              <Text className="text-white text-2xl font-bold">
+                {userInfo?.name?.charAt(0).toUpperCase() || "😎"}
+              </Text>
             )}
           </View>
           <View>
-            <Text className="text-2xl font-bold text-white">{userInfo?.name || 'User'}</Text>
+            <Text className="text-2xl font-bold text-white">
+              {userInfo?.name || "User"}
+            </Text>
             <Text className="text-slate-400 text-sm mt-1">
               Building a better version{"\n"}of myself every day.
             </Text>
@@ -94,16 +97,16 @@ export const ProfileScreen = ({ navigation }: any) => {
 
         {/* Settings List */}
         <View className="bg-[#1E293B] rounded-3xl p-2 mb-12">
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
               <ListTodo color="#94A3B8" size={20} />
               <Text className="text-white ml-4 text-base">My Tasks</Text>
             </View>
             <ChevronRight color="#475569" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-800 ml-12" /> */}
 
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.navigate("ManageCategoriesScreen")}
             className="flex-row items-center justify-between p-4"
           >
@@ -115,7 +118,10 @@ export const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <View className="h-[1px] bg-slate-800 ml-12" />
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          <TouchableOpacity
+            onPress={() => navigation.navigate("RemindersScreen")}
+            className="flex-row items-center justify-between p-4"
+          >
             <View className="flex-row items-center">
               <Bell color="#94A3B8" size={20} />
               <Text className="text-white ml-4 text-base">Reminders</Text>
@@ -124,7 +130,7 @@ export const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <View className="h-[1px] bg-slate-800 ml-12" />
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
               <Moon color="#94A3B8" size={20} />
               <Text className="text-white ml-4 text-base">Theme</Text>
@@ -134,7 +140,7 @@ export const ProfileScreen = ({ navigation }: any) => {
               <ChevronRight color="#475569" size={20} />
             </View>
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-800 ml-12" /> */}
 
           <TouchableOpacity
             onPress={() => {
@@ -165,12 +171,12 @@ export const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <View className="h-[1px] bg-slate-800 ml-12" />
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
               <LogOut color="#EF4444" size={20} />
               <Text className="text-[#EF4444] ml-4 text-base">Logout</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
     </SafeAreaView>

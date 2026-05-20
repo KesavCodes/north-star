@@ -160,3 +160,11 @@ export async function scheduleTaskReminder(taskId: string, taskName: string, tim
     console.warn("Failed to schedule task reminder notification", error);
   }
 }
+
+export async function cancelTaskReminder(taskId: string) {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(`task-reminder-${taskId}`);
+  } catch (error) {
+    console.warn("Failed to cancel task reminder notification", error);
+  }
+}

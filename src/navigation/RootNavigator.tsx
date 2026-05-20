@@ -11,6 +11,7 @@ import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { AddCategoryScreen } from "../screens/AddCategoryScreen";
 import { ManageCategoriesScreen } from "../screens/ManageCategoriesScreen";
+import { RemindersScreen } from "../screens/RemindersScreen";
 import { useStore } from "../store/useStore";
 
 const Stack = createNativeStackNavigator();
@@ -43,6 +44,7 @@ export const RootNavigator = () => {
           <Stack.Screen name="DayDetails" component={DayDetailsScreen} />
           <Stack.Screen name="Streaks" component={StreaksScreen} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="RemindersScreen" component={RemindersScreen} />
         </>
       )}
     </Stack.Navigator>
