@@ -60,20 +60,20 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView
-      className="flex-1 bg-[#111827]"
+      className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       }}
     >
       {/* Header */}
       <View className="flex-row justify-center items-center px-5 mt-4 mb-8">
-        <Text className="text-lg font-bold text-white">Profile</Text>
+        <Text className="text-lg font-bold text-slate-800">Profile</Text>
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
         <View className="flex-row items-center mb-10">
-          <View className="w-16 h-16 rounded-full bg-[#2ECC71] items-center justify-center mr-4 overflow-hidden border border-slate-700">
+          <View className="w-16 h-16 rounded-full bg-[#2ECC71] items-center justify-center mr-4 overflow-hidden border border-slate-200">
             {userInfo?.profilePic ? (
               <Image
                 source={{ uri: userInfo.profilePic }}
@@ -86,61 +86,61 @@ export const ProfileScreen = ({ navigation }: any) => {
             )}
           </View>
           <View>
-            <Text className="text-2xl font-bold text-white">
+            <Text className="text-2xl font-bold text-slate-800">
               {userInfo?.name || "User"}
             </Text>
-            <Text className="text-slate-400 text-sm mt-1">
+            <Text className="text-slate-500 text-sm mt-1">
               Building a better version{"\n"}of myself every day.
             </Text>
           </View>
         </View>
 
         {/* Settings List */}
-        <View className="bg-[#1E293B] rounded-3xl p-2 mb-12">
+        <View className="bg-white rounded-3xl p-2 mb-12 shadow-sm border border-slate-50">
           {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
-              <ListTodo color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">My Tasks</Text>
+              <ListTodo color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">My Tasks</Text>
             </View>
-            <ChevronRight color="#475569" size={20} />
+            <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" /> */}
+          <View className="h-[1px] bg-slate-100 ml-12" /> */}
 
           <TouchableOpacity
             onPress={() => navigation.navigate("ManageCategoriesScreen")}
             className="flex-row items-center justify-between p-4"
           >
             <View className="flex-row items-center">
-              <Folder color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">Categories</Text>
+              <Folder color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">Categories</Text>
             </View>
-            <ChevronRight color="#475569" size={20} />
+            <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-100 ml-12" />
 
           <TouchableOpacity
             onPress={() => navigation.navigate("RemindersScreen")}
             className="flex-row items-center justify-between p-4"
           >
             <View className="flex-row items-center">
-              <Bell color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">Reminders</Text>
+              <Bell color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">Reminders</Text>
             </View>
-            <ChevronRight color="#475569" size={20} />
+            <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-100 ml-12" />
 
           {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
-              <Moon color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">Theme</Text>
+              <Moon color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">Theme</Text>
             </View>
             <View className="flex-row items-center">
               <Text className="text-slate-400 mr-2">Dark</Text>
-              <ChevronRight color="#475569" size={20} />
+              <ChevronRight color="#CBD5E1" size={20} />
             </View>
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" /> */}
+          <View className="h-[1px] bg-slate-100 ml-12" /> */}
 
           <TouchableOpacity
             onPress={() => {
@@ -153,23 +153,26 @@ export const ProfileScreen = ({ navigation }: any) => {
             className="flex-row items-center justify-between p-4"
           >
             <View className="flex-row items-center">
-              <HardDriveDownload color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">
+              <HardDriveDownload color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">
                 Backup & Restore
               </Text>
             </View>
-            <ChevronRight color="#475569" size={20} />
+            <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-100 ml-12" />
 
-          <TouchableOpacity className="flex-row items-center justify-between p-4">
+          <TouchableOpacity
+            onPress={() => navigation.navigate("AboutScreen")}
+            className="flex-row items-center justify-between p-4"
+          >
             <View className="flex-row items-center">
-              <Info color="#94A3B8" size={20} />
-              <Text className="text-white ml-4 text-base">About</Text>
+              <Info color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">About</Text>
             </View>
-            <ChevronRight color="#475569" size={20} />
+            <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-800 ml-12" />
+          <View className="h-[1px] bg-slate-100 ml-12" />
 
           {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
