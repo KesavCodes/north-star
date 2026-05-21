@@ -172,6 +172,12 @@ export const AnalyticsScreen = ({ navigation }: any) => {
   // ── range + buckets ──
   const { start, end } = getRange(tab);
   const { start: prevStart, end: prevEnd } = getPrevRange(tab);
+
+  const dateSubtitle = useMemo(() => {
+    if (tab === "Week") return `This Week • ${format(start, "w'st Week'")}`;
+    if (tab === "Month") return `This Month • ${format(start, "MMM yyyy")}`;
+    return `This Year • ${format(start, "yyyy")}`;
+  }, [tab, start]);
   const buckets = buildBuckets(tab);
   // console.log(start, end, buckets);
 
@@ -416,13 +422,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         {/* Productive Time */}
         <ChartCard
           title="Productive Time"
-          subtitle={
-            tab === "Week"
-              ? "This Week"
-              : tab === "Month"
-                ? "This Month"
-                : "This Year"
-          }
+          subtitle={dateSubtitle}
           summaryValue={timerTotal === 0 ? "—" : formatHoursLabel(timerTotal)}
           trend={
             timerTotal > 0 || timerPrevTotal > 0
@@ -447,13 +447,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         {/* Habit Consistency */}
         <ChartCard
           title="Habit Consistency"
-          subtitle={
-            tab === "Week"
-              ? "This Week"
-              : tab === "Month"
-                ? "This Month"
-                : "This Year"
-          }
+          subtitle={dateSubtitle}
           summaryValue={habitAvg === 0 ? "—" : `${habitAvg}%`}
           trend={
             habitAvg > 0 || habitPrevAvg > 0
@@ -478,13 +472,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         {/* Metric Count */}
         <ChartCard
           title="Metric Count"
-          subtitle={
-            tab === "Week"
-              ? "This Week"
-              : tab === "Month"
-                ? "This Month"
-                : "This Year"
-          }
+          subtitle={dateSubtitle}
           summaryValue={counterTotal === 0 ? "—" : `${counterTotal}`}
           trend={
             counterTotal > 0 || counterPrevTotal > 0

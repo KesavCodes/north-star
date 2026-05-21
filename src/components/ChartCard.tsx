@@ -59,7 +59,32 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   onFilterChange,
   type,
 }) => {
-  const chartWidth = width;
+
+  const availableChartWidth = width - 40;
+  const dataLength = data.length || 1;
+
+  let dynamicBarWidth;
+  let dynamicSpacing;
+  let lineSpacing;
+
+  if (dataLength <= 7) {
+    // Week
+    const targetWidth = availableChartWidth - 60; // Padding for start/end
+    dynamicBarWidth = Math.max(12, Math.floor((targetWidth * 0.4) / dataLength));
+    dynamicSpacing = Math.max(16, Math.floor((targetWidth * 0.6) / dataLength));
+    lineSpacing = Math.floor(targetWidth / Math.max(1, dataLength - 1)) - 5;
+  } else if (dataLength <= 14) {
+    // Year
+    const targetWidth = availableChartWidth - 60;
+    dynamicBarWidth = Math.max(8, Math.floor((targetWidth * 0.4) / dataLength));
+    dynamicSpacing = Math.max(12, Math.floor((targetWidth * 0.6) / dataLength));
+    lineSpacing = Math.floor(targetWidth / Math.max(1, dataLength - 1)) - 2;
+  } else {
+    // Month (allow horizontal scrolling)
+    dynamicBarWidth = 6;
+    dynamicSpacing = 20;
+    lineSpacing = 24;
+  }
 
   const trendColor =
     !trend || trend.percent === 0
@@ -195,15 +220,18 @@ export const ChartCard: React.FC<ChartCardProps> = ({
             roundedBottom
             xAxisThickness={0}
             yAxisThickness={0}
+            xAxisLabelTextStyle={{ color: "#94A3B8", fontSize: 10 }}
             yAxisTextStyle={{ color: "#94A3B8", fontSize: 10 }}
             yAxisLabelSuffix={
               type === "timer" ? "h" : type === "percentage" ? "%" : ""
             }
             noOfSections={4}
             maxValue={maxValue}
-            barWidth={5}
-            width={width - 40}
-            initialSpacing={10}
+            barWidth={dynamicBarWidth}
+            spacing={dynamicSpacing}
+            width={availableChartWidth}
+            initialSpacing={20}
+            endSpacing={20}
             frontColor={accentColor}
           />
         ) : (
@@ -214,15 +242,17 @@ export const ChartCard: React.FC<ChartCardProps> = ({
             hideDataPoints
             xAxisThickness={0}
             yAxisThickness={0}
+            xAxisLabelTextStyle={{ color: "#94A3B8", fontSize: 10 }}
             yAxisLabelSuffix={
               type === "timer" ? "h" : type === "percentage" ? "%" : ""
             }
             yAxisTextStyle={{ color: "#94A3B8", fontSize: 10 }}
             noOfSections={4}
             maxValue={maxValue}
-            curved
-            width={chartWidth}
-            initialSpacing={10}
+            width={availableChartWidth}
+            spacing={lineSpacing}
+            initialSpacing={20}
+            endSpacing={20}
             areaChart
             startFillColor={accentColor}
             startOpacity={0.18}
