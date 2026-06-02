@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   Home,
-  BarChart2,
+  Calendar,
   PlusCircle,
   Book,
   User,
@@ -13,8 +13,8 @@ import {
 } from "lucide-react-native";
 import { HomeScreen } from "../screens/HomeScreen";
 import { JournalScreen } from "../screens/JournalScreen";
-import { AnalyticsScreen } from "../screens/AnalyticsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { CalendarHeatmapScreen } from "../screens/CalendarHeatmapScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,12 +51,10 @@ export const TabNavigator = ({ navigation }: any) => {
           }}
         />
         <Tab.Screen
-          name="Analytics"
-          component={AnalyticsScreen}
+          name="Journal"
+          component={JournalScreen}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <BarChart2 color={color} size={size} />
-            ),
+            tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
           }}
         />
         <Tab.Screen
@@ -78,10 +76,12 @@ export const TabNavigator = ({ navigation }: any) => {
           })}
         />
         <Tab.Screen
-          name="Journal"
-          component={JournalScreen}
+          name="Calendar"
+          component={CalendarHeatmapScreen}
           options={{
-            tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => (
+              <Calendar color={color} size={size} />
+            ),
           }}
         />
         <Tab.Screen

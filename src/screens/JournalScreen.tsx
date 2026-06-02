@@ -11,17 +11,20 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { useStore } from "../store/useStore";
-import { format } from "date-fns";
-import { ChevronLeft, Calendar } from "lucide-react-native";
+import { format, addDays, subDays } from "date-fns";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react-native";
 import { useToast } from "../components/ToastProvider";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export const JournalScreen = ({ navigation }: any) => {
   const { journals, saveJournal } = useStore();
   const { showToast } = useToast();
-  const today = format(new Date(), "yyyy-MM-dd");
-  const displayDate = format(new Date(), "dd MMM, yyyy");
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const selectedDateStr = format(currentDate, "yyyy-MM-dd");
+  const displayDate = format(currentDate, "dd MMM, yyyy");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const existingEntry = journals[today];
+  const existingEntry = journals[selectedDateStr];
 
   const [dayInBrief, setDayInBrief] = useState(existingEntry?.dayInBrief || "");
   const [wentWell, setWentWell] = useState(existingEntry?.wentWell || "");
@@ -39,6 +42,7 @@ export const JournalScreen = ({ navigation }: any) => {
     setCouldImprove(existingEntry?.couldImprove || "");
     setGratefulFor(existingEntry?.gratefulFor || "");
   }, [
+    selectedDateStr,
     existingEntry?.dayInBrief,
     existingEntry?.wentWell,
     existingEntry?.couldImprove,
@@ -47,7 +51,7 @@ export const JournalScreen = ({ navigation }: any) => {
 
   const handleSave = () => {
     saveJournal({
-      date: today,
+      date: selectedDateStr,
       dayInBrief,
       wentWell,
       couldImprove,
@@ -91,12 +95,47 @@ export const JournalScreen = ({ navigation }: any) => {
             <Text className="text-lg font-bold text-slate-800">
               Daily Reflection
             </Text>
-            <Text className="text-xs text-slate-500">{displayDate}</Text>
+            <View className="flex-row items-center mt-0.5 gap-2">
+              <TouchableOpacity
+                onPress={() => setCurrentDate(subDays(currentDate, 1))}
+              >
+                <ChevronLeft size={14} color="#64748b" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                className="flex-row items-center mx-2 px-2 py-1 rounded-md gap-2 justify-center"
+              >
+                <Calendar size={11} color="#64748b" className="mr-1" />
+                <Text className="text-xs text-slate-600 font-medium">
+                  {displayDate}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setCurrentDate(addDays(currentDate, 1))}
+              >
+                <ChevronRight size={14} color="#64748b" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <TouchableOpacity className="p-2 -mr-2">
-            <Calendar color="#334155" size={24} />
-          </TouchableOpacity>
+          {/* Placeholder for centering title */}
+          <View style={{ width: 32 }} />
         </View>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={currentDate}
+            mode="date"
+            onDismiss={() => setShowDatePicker(false)}
+            onValueChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                setCurrentDate(selectedDate);
+              }
+            }}
+          />
+        )}
 
         <ScrollView
           className="flex-1 px-5 mt-6 mb-20"
