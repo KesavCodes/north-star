@@ -271,6 +271,33 @@ export const useStore = create<AppState>()(
           };
         }),
 
+      updateTimerSessions: (taskId, date, sessions) =>
+        set((state) => {
+          const logId = getLogId(taskId, date);
+          const existingLog = state.logs[logId];
+          if (!existingLog) return state;
+
+          const newValue = sessions.reduce(
+            (acc, s) => acc + Math.floor((s.endTime - s.startTime) / 1000),
+            0
+          );
+
+          const task = get().getTaskById(taskId);
+          const target = task?.target || 7200;
+
+          return {
+            logs: {
+              ...state.logs,
+              [logId]: {
+                ...existingLog,
+                sessions,
+                value: newValue,
+                completed: newValue >= target,
+              },
+            },
+          };
+        }),
+
       saveJournal: (entry) =>
         set((state) => ({
           journals: {

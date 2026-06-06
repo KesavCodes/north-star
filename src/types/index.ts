@@ -86,6 +86,11 @@ export interface AppState {
     session: { startTime: number; endTime: number },
     completed?: boolean,
   ) => void;
+  updateTimerSessions: (
+    taskId: string, 
+    date: string, 
+    sessions: { startTime: number; endTime: number }[]
+  ) => void;
   startTimer: (taskId: string, date: string) => void;
   pauseTimer: (taskId: string, date: string) => void;
 

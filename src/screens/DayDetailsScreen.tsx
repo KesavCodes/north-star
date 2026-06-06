@@ -258,7 +258,11 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                 const progress = Math.min((elapsed / target) * 100, 100);
 
                 return (
-                  <View key={task.id} className="py-2 border-b border-slate-50">
+                  <TouchableOpacity 
+                    key={task.id} 
+                    className="py-2 border-b border-slate-50"
+                    onPress={() => navigation.navigate("TimerScreen", { taskId: task.id })}
+                  >
                     <View className="flex-row justify-between items-center">
                       <Text className="text-sm text-slate-700 font-medium">
                         {task.name}
@@ -275,7 +279,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                         style={{ width: `${progress}%` }}
                       />
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
               {timers.length === 0 && (
