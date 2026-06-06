@@ -12,6 +12,8 @@ import {
   ScrollView,
 } from "react-native";
 import { useStore } from "../store/useStore";
+import * as DocumentPicker from "expo-document-picker";
+import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "../components/ToastProvider";
 import {
@@ -23,7 +25,7 @@ import {
 } from "lucide-react-native";
 
 export const OnboardingScreen = () => {
-  const { setUserInfo } = useStore();
+  const { setUserInfo, importData } = useStore();
   const { showToast } = useToast();
   const [name, setName] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -59,6 +61,30 @@ export const OnboardingScreen = () => {
         body: "Please enter your name to proceed.",
         type: "warning",
       });
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync();
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const fileUri = result.assets[0].uri;
+        const file = new File(fileUri);
+        const fileContent = await file.text();
+        importData(fileContent);
+        showToast({
+          title: "Import Successful",
+          body: "Your data has been restored successfully.",
+          type: "success",
+        });
+      }
+    } catch (e) {
+      showToast({
+        title: "Import Failed",
+        body: "Could not read the backup file.",
+        type: "error",
+      });
+      console.error(e);
     }
   };
 
@@ -161,6 +187,12 @@ export const OnboardingScreen = () => {
 
         {/* Footer */}
         <View className="px-6 pb-8 pt-4 bg-[#111827]">
+          <TouchableOpacity
+            onPress={handleImport}
+            className="w-full py-4 rounded-2xl items-center justify-center flex-row bg-slate-800 mb-4"
+          >
+            <Text className="font-bold text-lg text-white">Import Existing Data</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleGetStarted}
             disabled={!name.trim()}

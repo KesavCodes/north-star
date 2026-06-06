@@ -23,9 +23,12 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import { File } from "expo-file-system";
+import * as DocumentPicker from "expo-document-picker";
 
 export const ProfileScreen = ({ navigation }: any) => {
-  const { userInfo, setUserInfo } = useStore();
+  const { userInfo, setUserInfo, importData } = useStore();
   const [isNameModalVisible, setIsNameModalVisible] = useState(false);
   const [newName, setNewName] = useState("");
 
@@ -41,19 +44,46 @@ export const ProfileScreen = ({ navigation }: any) => {
       setUserInfo({ ...userInfo, profilePic: result.assets[0].uri });
     }
   };
-  const handleExport = async () => {
-    try {
-      const data = await AsyncStorage.getItem("north-star-storage");
-      // In a real app, you would use expo-sharing to let user save this file
-      Alert.alert("Export Successful", "Data exported to local storage.");
-      console.log(data); // for testing
-    } catch (e) {
-      Alert.alert("Export Failed", "Could not export data.");
+const handleExport = async () => {
+  try {
+    const data = await AsyncStorage.getItem("north-star-storage-2");
+
+    if (!data) {
+      Alert.alert("Export Failed", "No data found to export.");
+      return;
     }
-  };
+
+    const permissions =
+      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+    if (!permissions.granted) {
+      Alert.alert(
+        "Export Cancelled",
+        "Please select a folder to save the backup."
+      );
+      return;
+    }
+
+    const fileUri =
+      await FileSystem.StorageAccessFramework.createFileAsync(
+        permissions.directoryUri,
+        `north-star-backup-${Date.now()}.json`,
+        "application/json"
+      );
+
+    await FileSystem.writeAsStringAsync(fileUri, data);
+
+    Alert.alert(
+      "Export Successful",
+      "Backup file has been saved successfully."
+    );
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Export Failed", "Could not export data.");
+  }
+};
 
   const handleImport = () => {
-    // In a real app, use expo-document-picker to select file
     Alert.alert(
       "Import Data",
       "This will overwrite current data. Are you sure?",
@@ -62,10 +92,21 @@ export const ProfileScreen = ({ navigation }: any) => {
         {
           text: "Import",
           style: "destructive",
-          onPress: () => {
-            // mock import
-            // importData(mockJsonString);
-            Alert.alert("Import Successful", "Data restored.");
+          onPress: async () => {
+            try {
+              const result = await DocumentPicker.getDocumentAsync();
+              if (!result.canceled && result.assets && result.assets.length > 0) {
+                const fileUri = result.assets[0].uri;
+                const file = new File(fileUri);
+                const fileContent = await file.text();
+                console.log(fileContent);
+                importData(fileContent);
+                Alert.alert("Import Successful", "Data restored successfully.");
+              }
+            } catch (e) {
+              Alert.alert("Import Failed", "Could not read the file.");
+              console.error(e);
+            }
           },
         },
       ],
