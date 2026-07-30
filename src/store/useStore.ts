@@ -98,8 +98,23 @@ export const useStore = create<AppState>()(
           };
         }),
 
-      updateTask: (taskId, updates) =>
+      updateTask: (taskId, updates, date) =>
         set((state) => {
+          if (date && state.tasks[date]) {
+            const list = state.tasks[date];
+            const index = list.findIndex((t) => t.id === taskId);
+            if (index !== -1) {
+              const updatedList = [...list];
+              updatedList[index] = { ...updatedList[index], ...updates };
+              return {
+                tasks: {
+                  ...state.tasks,
+                  [date]: updatedList,
+                },
+              };
+            }
+          }
+
           const newTasks = { ...state.tasks };
           for (const key in newTasks) {
             const index = newTasks[key].findIndex((t) => t.id === taskId);
@@ -111,8 +126,17 @@ export const useStore = create<AppState>()(
           return { tasks: newTasks };
         }),
 
-      deleteTask: (taskId) =>
+      deleteTask: (taskId, date) =>
         set((state) => {
+          if (date && state.tasks[date]) {
+            return {
+              tasks: {
+                ...state.tasks,
+                [date]: state.tasks[date].filter((t) => t.id !== taskId),
+              },
+            };
+          }
+
           const newTasks = { ...state.tasks };
           for (const key in newTasks) {
             newTasks[key] = newTasks[key].filter((t) => t.id !== taskId);

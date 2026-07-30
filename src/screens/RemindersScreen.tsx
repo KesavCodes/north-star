@@ -33,9 +33,8 @@ export const RemindersScreen = ({ navigation }: any) => {
           style: "destructive",
           onPress: async () => {
             await cancelTaskReminder(task.id);
-            // We use undefined to remove the property, but since Partial<Task> is expected,
-            // we might need to cast it or just set it to undefined as any.
-            updateTask(task.id, { reminderTime: undefined } as any);
+            const dateKey = task.isRoutine ? "routine" : task.date;
+            updateTask(task.id, { reminderTime: undefined } as any, dateKey);
           },
         },
       ],

@@ -70,8 +70,8 @@ export interface AppState {
 
   // Task Actions
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;
-  updateTask: (taskId: string, updates: Partial<Task>) => void;
-  deleteTask: (taskId: string) => void;
+  updateTask: (taskId: string, updates: Partial<Task>, date?: string) => void;
+  deleteTask: (taskId: string, date?: string) => void;
 
   logTaskProgress: (
     taskId: string,
