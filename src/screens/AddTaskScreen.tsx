@@ -71,8 +71,24 @@ export const AddTaskScreen = ({ navigation }: any) => {
       const h = parseInt(targetDurationHours) || 0;
       const m = parseInt(targetDurationMinutes) || 0;
       target = h * 3600 + m * 60;
+      if (target <= 0) {
+        showToast({
+          title: "Invalid Duration",
+          body: "Please set a target duration greater than 0.",
+          type: "error",
+        });
+        return;
+      }
     } else if (taskType === "counter") {
-      target = parseInt(targetCount) || 1;
+      target = parseInt(targetCount, 10);
+      if (!target || isNaN(target) || target <= 0) {
+        showToast({
+          title: "Invalid Target Count",
+          body: "Please enter a valid positive number for the counter target.",
+          type: "error",
+        });
+        return;
+      }
     }
 
     addTask({
@@ -213,6 +229,36 @@ export const AddTaskScreen = ({ navigation }: any) => {
           className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 mb-6"
         />
 
+        {/* Daily Target */}
+        {taskType !== "checkbox" && (
+          <>
+            <Text className="text-sm font-semibold text-slate-800 mb-3">
+              Daily Target
+            </Text>
+            {taskType === "timer" ? (
+              <View className="mb-6">
+                <TimePickerDropdown
+                  hours={targetDurationHours}
+                  minutes={targetDurationMinutes}
+                  onHoursChange={setTargetDurationHours}
+                  onMinutesChange={setTargetDurationMinutes}
+                />
+              </View>
+            ) : (
+              <View className="bg-white rounded-2xl border border-slate-100 mb-6 flex-row items-center p-2">
+                <Hash color="#94A3B8" size={22} />
+                <TextInput
+                  value={targetCount}
+                  onChangeText={(val) => setTargetCount(val.replace(/[^0-9]/g, ""))}
+                  keyboardType="number-pad"
+                  className="text-lg font-bold text-slate-800 flex-1 ml-2"
+                  placeholder="e.g. 5"
+                />
+              </View>
+            )}
+          </>
+        )}
+
         {/* Category */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Category
@@ -241,35 +287,6 @@ export const AddTaskScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             ))}
         </View>
-
-        {/* Daily Target */}
-        {taskType !== "checkbox" && (
-          <>
-            <Text className="text-sm font-semibold text-slate-800 mb-3">
-              Daily Target
-            </Text>
-            {taskType === "timer" ? (
-              <View className="mb-6">
-                <TimePickerDropdown
-                  hours={targetDurationHours}
-                  minutes={targetDurationMinutes}
-                  onHoursChange={setTargetDurationHours}
-                  onMinutesChange={setTargetDurationMinutes}
-                />
-              </View>
-            ) : (
-              <View className="bg-white rounded-2xl border border-slate-100 mb-6 flex-row items-center p-2">
-                <Hash color="#94A3B8" size={22} />
-                <TextInput
-                  value={targetCount}
-                  onChangeText={setTargetCount}
-                  keyboardType="numeric"
-                  className="text-lg font-bold text-slate-800 flex-1"
-                />
-              </View>
-            )}
-          </>
-        )}
 
         {/* Icon & Color */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">Color</Text>
@@ -311,7 +328,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
             />
           </View>
         ) : (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setReminderEnabled(true)}
             className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center"
           >

@@ -14,7 +14,7 @@ import { useStore } from "../store/useStore";
 import { useToast } from "../components/ToastProvider";
 
 export const AddCategoryScreen = ({ navigation }: any) => {
-  const { addCategory } = useStore();
+  const { categories, addCategory } = useStore();
   const { showToast } = useToast();
 
   const [name, setName] = useState("");
@@ -33,7 +33,10 @@ export const AddCategoryScreen = ({ navigation }: any) => {
   ];
 
   const handleSave = () => {
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    const trimmedEmoji = emoji.trim();
+
+    if (!trimmedName) {
       showToast({
         title: "Missing Name",
         body: "Please enter a name for the category.",
@@ -42,7 +45,7 @@ export const AddCategoryScreen = ({ navigation }: any) => {
       return;
     }
 
-    if (!emoji.trim()) {
+    if (!trimmedEmoji) {
       showToast({
         title: "Missing Emoji",
         body: "Please enter an emoji.",
@@ -51,15 +54,28 @@ export const AddCategoryScreen = ({ navigation }: any) => {
       return;
     }
 
+    const isDuplicate = categories.some(
+      (c) => c.name.trim().toLowerCase() === trimmedName.toLowerCase(),
+    );
+
+    if (isDuplicate) {
+      showToast({
+        title: "Category Already Exists",
+        body: `A category named "${trimmedName}" already exists.`,
+        type: "error",
+      });
+      return;
+    }
+
     addCategory({
-      name,
-      emoji,
+      name: trimmedName,
+      emoji: trimmedEmoji,
       color: selectedColor,
     });
 
     showToast({
       title: "Category Added",
-      body: `Successfully created ${name}.`,
+      body: `Successfully created ${trimmedName}.`,
       type: "success",
     });
 

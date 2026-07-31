@@ -127,8 +127,7 @@ export const JournalScreen = ({ navigation }: any) => {
           <DateTimePicker
             value={currentDate}
             mode="date"
-            onDismiss={() => setShowDatePicker(false)}
-            onValueChange={(event, selectedDate) => {
+            onChange={(event: any, selectedDate?: Date) => {
               setShowDatePicker(false);
               if (selectedDate) {
                 setCurrentDate(selectedDate);

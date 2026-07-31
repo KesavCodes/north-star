@@ -9,6 +9,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useStore } from "../store/useStore";
+import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format } from "date-fns";
 import {
   ChevronLeft,
@@ -100,16 +101,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             onPress={() => setActiveCategory("all")}
-            className={`py-2 px-6 rounded-full mr-2 ${
-              activeCategory === "all"
-                ? "bg-slate-800"
-                : "bg-white border border-slate-200"
-            }`}
+            className={`py-2 px-6 rounded-full mr-2 ${activeCategory === "all"
+              ? "bg-slate-800"
+              : "bg-white border border-slate-200"
+              }`}
           >
             <Text
-              className={`font-semibold capitalize ${
-                activeCategory === "all" ? "text-white" : "text-slate-600"
-              }`}
+              className={`font-semibold capitalize ${activeCategory === "all" ? "text-white" : "text-slate-600"
+                }`}
             >
               All
             </Text>
@@ -123,16 +122,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                 <TouchableOpacity
                   key={cat.id}
                   onPress={() => setActiveCategory(cat.id)}
-                  className={`py-2 px-6 rounded-full mr-2 ${
-                    isActive
-                      ? "bg-slate-800"
-                      : "bg-white border border-slate-200"
-                  }`}
+                  className={`py-2 px-6 rounded-full mr-2 ${isActive
+                    ? "bg-slate-800"
+                    : "bg-white border border-slate-200"
+                    }`}
                 >
                   <Text
-                    className={`font-semibold capitalize ${
-                      isActive ? "text-white" : "text-slate-600"
-                    }`}
+                    className={`font-semibold capitalize ${isActive ? "text-white" : "text-slate-600"
+                      }`}
                   >
                     {cat.name}
                   </Text>
@@ -233,9 +230,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                       </Text>
                       <View className="flex-row items-center">
                         <Text className="text-sm font-semibold text-slate-500 mr-3">
-                          {Math.floor(elapsed / 60)}:
-                          {(elapsed % 60).toString().padStart(2, "0")} /{" "}
-                          {Math.floor(target / 60)}:00
+                          {formatDigitalTime(elapsed)} / {formatDuration(target)}
                         </Text>
                         <TouchableOpacity
                           onPress={() =>

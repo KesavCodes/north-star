@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useStore } from "../store/useStore";
+import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format, parseISO } from "date-fns";
 import { ChevronLeft, CheckCircle2, Info, XCircle } from "lucide-react-native";
 import { DayJournal } from "../components/dayDetails/DayJournal";
@@ -21,7 +22,16 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedLogs, setEditedLogs] = useState<Record<string, boolean>>({});
   const { date } = route.params || { date: format(new Date(), "yyyy-MM-dd") };
-  const { logs, getTasksForDate, setTaskCompleted } = useStore();
+  const { logs, getTasksForDate, setTaskCompleted, activeTimers } = useStore();
+  const [tick, setTick] = useState(0);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (activeTimers && Object.keys(activeTimers).length > 0) {
+      interval = setInterval(() => setTick((t) => t + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [activeTimers]);
 
   const displayDate = format(parseISO(date), "dd MMM, yyyy");
 
@@ -253,13 +263,19 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
             <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
               {timers.map((task) => {
                 const logId = `${task.id}-${date}`;
-                const elapsed = logs[logId]?.value || 0;
+                const baseElapsed = logs[logId]?.value || 0;
+                const activeTimer = activeTimers?.[task.id];
+                const currentSessionElapsed =
+                  activeTimer && activeTimer.date === date
+                    ? Math.floor((Date.now() - activeTimer.startTime) / 1000)
+                    : 0;
+                const elapsed = baseElapsed + currentSessionElapsed;
                 const target = task.target || 3600;
                 const progress = Math.min((elapsed / target) * 100, 100);
 
                 return (
-                  <TouchableOpacity 
-                    key={task.id} 
+                  <TouchableOpacity
+                    key={task.id}
                     className="py-2 border-b border-slate-50"
                     onPress={() => navigation.navigate("TimerScreen", { taskId: task.id })}
                   >
@@ -267,10 +283,8 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                       <Text className="text-sm text-slate-700 font-medium">
                         {task.name}
                       </Text>
-                      <Text className="text-xs text-slate-500">
-                        {Math.floor(elapsed / 60)}:
-                        {(elapsed % 60).toString().padStart(2, "0")} /{" "}
-                        {Math.floor(target / 60)}:00
+                      <Text className="text-xs text-slate-500 font-medium">
+                        {formatDigitalTime(elapsed)} / {formatDuration(target)}
                       </Text>
                     </View>
                     <View className="h-1 bg-slate-100 rounded-full mt-2 overflow-hidden">

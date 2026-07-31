@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { useStore } from "../store/useStore";
+import { formatDuration } from "../utils/formatters";
 import { format } from "date-fns";
 import { ChevronLeft, MoreVertical, Play, Pause, Trash2, Plus, RotateCcw } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
@@ -193,7 +194,7 @@ export const TimerScreen = ({ route, navigation }: any) => {
             DAILY TARGET
           </Text>
           <Text className="text-white text-base font-medium mt-1">
-            {formatTime(target)}
+            {formatDuration(target)}
           </Text>
         </View>
         {isEditing ? (
