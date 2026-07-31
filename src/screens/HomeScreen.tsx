@@ -6,10 +6,10 @@ import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Greetings from "../components/home/Greetings";
 import DateRow from "../components/home/DateRow";
-import MotivationCard from "../components/home/MotivationCard";
+// import MotivationCard from "../components/home/MotivationCard";
 import TodaysOverview from "../components/home/TodaysOverview";
 import QuickActions from "../components/home/QuickActions";
-import ActiveTimers from "../components/home/ActiveTimers";
+import CurrentDayTimers from "../components/home/CurrentDayTimers";
 
 export const HomeScreen = () => {
   const navigation = useNavigation<any>();
@@ -59,13 +59,13 @@ export const HomeScreen = () => {
         {/* Date Row */}
         <DateRow />
         {/* Motivation Card */}
-        <MotivationCard />
+        {/* <MotivationCard /> */}
         {/* Today's Overview */}
         <TodaysOverview />
         {/* Quick Actions */}
         <QuickActions />
-        {/* Active Timers */}
-        <ActiveTimers />
+        {/* Today's Timers Overview */}
+        <CurrentDayTimers />
       </ScrollView>
     </ScreenWrapper>
   );

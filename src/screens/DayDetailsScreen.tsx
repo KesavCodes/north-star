@@ -12,7 +12,7 @@ import {
 import { useStore } from "../store/useStore";
 import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format, parseISO } from "date-fns";
-import { ChevronLeft, CheckCircle2, Info, XCircle } from "lucide-react-native";
+import { ChevronLeft, CheckCircle2, Info, XCircle, Plus } from "lucide-react-native";
 import { DayJournal } from "../components/dayDetails/DayJournal";
 
 export const DayDetailsScreen = ({ route, navigation }: any) => {
@@ -60,7 +60,12 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
           <ChevronLeft color="#334155" size={24} />
         </TouchableOpacity>
         <Text className="text-lg font-bold text-slate-800">{displayDate}</Text>
-        <View className="w-8" />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("AddTaskScreen", { initialDate: date })}
+          className="p-2 -mr-2 flex-row items-center"
+        >
+          <Plus color="#334155" size={24} />
+        </TouchableOpacity>
       </View>
 
       {/* Tab Bar — all dynamic styling via `style`, only static strings in `className` */}
@@ -303,6 +308,17 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
               )}
             </View>
           </View>
+
+          {/* Add Task for this Day Button */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("AddTaskScreen", { initialDate: date })}
+            className="bg-slate-800 rounded-2xl py-4 flex-row items-center justify-center mb-8 shadow-sm"
+          >
+            <Plus color="#FFFFFF" size={20} />
+            <Text className="text-white font-semibold text-base ml-2">
+              Add Task for this Day
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       ) : (
         <DayJournal date={date} />

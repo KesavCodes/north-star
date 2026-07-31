@@ -23,16 +23,22 @@ import {
   Repeat,
 } from "lucide-react-native";
 import { TaskType, TaskCategory } from "../types";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import TimePickerDropdown from "../components/addTask/TimePickerDropdown";
 import { useToast } from "../components/ToastProvider";
 
-export const AddTaskScreen = ({ navigation }: any) => {
+export const AddTaskScreen = ({ navigation, route }: any) => {
   const { addTask } = useStore();
   const { showToast } = useToast();
 
+  const initialDateStr = route?.params?.initialDate || route?.params?.date;
   const [taskType, setTaskType] = useState<TaskType>("checkbox");
-  const [isRoutine, setIsRoutine] = useState(true);
+  const [isRoutine, setIsRoutine] = useState(!initialDateStr);
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    initialDateStr ? parseISO(initialDateStr) : new Date(),
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<TaskCategory>("discipline");
   const [targetDurationHours, setTargetDurationHours] = useState("02");
@@ -96,7 +102,7 @@ export const AddTaskScreen = ({ navigation }: any) => {
       type: taskType,
       category,
       isRoutine,
-      date: isRoutine ? undefined : format(new Date(), "yyyy-MM-dd"),
+      date: isRoutine ? undefined : format(selectedDate, "yyyy-MM-dd"),
       target,
       reminderTime: reminderEnabled ? `${reminderHours}:${reminderMinutes}` : undefined,
       color: selectedColor,
@@ -168,6 +174,40 @@ export const AddTaskScreen = ({ navigation }: any) => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Task Date (for One-Time Tasks) */}
+        {!isRoutine && (
+          <View className="mb-6">
+            <Text className="text-sm font-semibold text-slate-800 mb-3">
+              Task Date
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              className="bg-white rounded-2xl border border-slate-100 p-4 flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center">
+                <CalendarDays color="#14B8A6" size={20} />
+                <Text className="ml-3 font-semibold text-slate-800">
+                  {format(selectedDate, "dd MMM, yyyy")}
+                </Text>
+              </View>
+              <Text className="text-xs font-semibold text-teal-600">Change Date</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                onChange={(event: any, date?: Date) => {
+                  setShowDatePicker(false);
+                  if (date) {
+                    setSelectedDate(date);
+                  }
+                }}
+              />
+            )}
+          </View>
+        )}
 
         {/* Task Type */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">
