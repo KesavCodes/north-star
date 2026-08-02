@@ -22,8 +22,15 @@ export const useStore = create<AppState>()(
       getTasksForDate: (date?: string) => {
         const routineTasks = get().tasks["routine"] || [];
         if (!date) return routineTasks;
+
+        const dayOfWeek = new Date(`${date}T00:00:00`).getDay();
+        const activeRoutineTasks = routineTasks.filter((task) => {
+          if (!task.daysOfWeek || task.daysOfWeek.length === 0) return true;
+          return task.daysOfWeek.includes(dayOfWeek);
+        });
+
         const dateTasks = get().tasks[date] || [];
-        return [...routineTasks, ...dateTasks];
+        return [...activeRoutineTasks, ...dateTasks];
       },
 
       getTaskById: (taskId: string) => {

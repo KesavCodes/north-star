@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
 import { useStore } from '../store/useStore';
 import { ChevronLeft, Flame, Heart } from 'lucide-react-native';
+import { calculateTaskStreak } from '../utils/streakUtils';
 
 export const StreaksScreen = ({ navigation }: any) => {
   const { tasks, logs } = useStore();
@@ -54,8 +55,7 @@ export const StreaksScreen = ({ navigation }: any) => {
         <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50 mb-12">
           
           {allTasks.map((task, index) => {
-            // Dummy streak logic
-            const currentStreak = Math.floor(Math.random() * 15);
+            const currentStreak = calculateTaskStreak(task, logs);
             return (
               <View key={task.id}>
                 <View className="flex-row justify-between items-center py-4">

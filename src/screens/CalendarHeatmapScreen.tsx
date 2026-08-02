@@ -11,6 +11,7 @@ import {
 import { useStore } from "../store/useStore";
 import {
   format,
+  parseISO,
   addMonths,
   subMonths,
   startOfMonth,
@@ -63,21 +64,37 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
     const calc = (category: string) => {
       let current = 0;
       let best = 0;
+
+      const allCategoryTasks = Object.values(useStore.getState().tasks)
+        .flat()
+        .filter((t) => t.category === category);
+
+      if (allCategoryTasks.length === 0) return { current: 0, best: 0 };
+
+      const taskCreatedDates = allCategoryTasks.map((t) =>
+        format(new Date(t.createdAt), "yyyy-MM-dd"),
+      );
       const logDates = Object.values(logs)
+        .filter((l: any) => {
+          const t = allCategoryTasks.find((task) => task.id === l.taskId);
+          return !!t;
+        })
         .map((l: any) => l.date)
         .filter((date: any) => date && /^\d{4}-\d{2}-\d{2}$/.test(date));
-      if (logDates.length === 0) return { current: 0, best: 0 };
 
-      logDates.sort(
-        (a: any, b: any) => new Date(a).getTime() - new Date(b).getTime(),
+      const allDates = [...taskCreatedDates, ...logDates].sort((a, b) =>
+        a.localeCompare(b),
       );
-      const earliestDate = new Date(logDates[0]);
-      const todayDate = new Date();
+      if (allDates.length === 0) return { current: 0, best: 0 };
 
-      if (earliestDate > todayDate) return { current: 0, best: 0 };
+      const earliestDateStr = allDates[0];
+      const todayDate = new Date();
+      const todayStr = format(todayDate, "yyyy-MM-dd");
+
+      if (earliestDateStr > todayStr) return { current: 0, best: 0 };
 
       const daysToCheck = eachDayOfInterval({
-        start: earliestDate,
+        start: parseISO(earliestDateStr),
         end: todayDate,
       });
 
@@ -85,14 +102,15 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
         const dateStr = format(day, "yyyy-MM-dd");
         const activeTasks = getTasksForDate(dateStr).filter((t: Task) => {
           if (t.category !== category) return false;
-          if (!t.isRoutine) return true;
           const createdDateStr = format(new Date(t.createdAt), "yyyy-MM-dd");
-          return (
-            dateStr >= createdDateStr &&
-            dateStr <= format(todayDate, "yyyy-MM-dd")
-          );
+          if (dateStr < createdDateStr) return false;
+          if (!t.isRoutine) return t.date === dateStr;
+          return true;
         });
+
+        // If no tasks scheduled for this category on this day (off-day), skip without breaking streak
         if (activeTasks.length === 0) return;
+
         const completedCount = activeTasks.filter(
           (t: Task) => logs[`${t.id}-${dateStr}`]?.completed,
         ).length;
@@ -101,7 +119,7 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
           current++;
           best = Math.max(best, current);
         } else {
-          if (dateStr !== format(todayDate, "yyyy-MM-dd")) {
+          if (dateStr !== todayStr) {
             current = 0;
           }
         }
@@ -112,9 +130,11 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
 
     const categoryStreaks: Record<string, { current: number; best: number }> =
       {};
-    categories.filter(c => !c.isArchived).forEach((cat) => {
-      categoryStreaks[cat.id] = calc(cat.id);
-    });
+    categories
+      .filter((c) => !c.isArchived)
+      .forEach((cat) => {
+        categoryStreaks[cat.id] = calc(cat.id);
+      });
     return categoryStreaks;
   }, [logs, getTasksForDate, categories]);
 

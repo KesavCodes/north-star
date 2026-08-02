@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,8 +16,8 @@ import {
   CheckSquare,
   Clock,
   Hash,
-  ShieldCheck,
-  Heart,
+  // ShieldCheck,
+  // Heart,
   ChevronRight,
   CalendarDays,
   Repeat,
@@ -26,6 +26,7 @@ import { TaskType, TaskCategory } from "../types";
 import { format, parseISO } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import TimePickerDropdown from "../components/addTask/TimePickerDropdown";
+import { ClockTimePicker } from "../components/ClockTimePicker";
 import { useToast } from "../components/ToastProvider";
 
 export const AddTaskScreen = ({ navigation, route }: any) => {
@@ -38,8 +39,25 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
   const [selectedDate, setSelectedDate] = useState<Date>(
     initialDateStr ? parseISO(initialDateStr) : new Date(),
   );
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [name, setName] = useState("");
+
+  const toggleDay = (day: number) => {
+    if (daysOfWeek.includes(day)) {
+      if (daysOfWeek.length === 1) {
+        showToast({
+          title: "At Least 1 Day Required",
+          body: "A routine task must be scheduled for at least one day of the week.",
+          type: "error",
+        });
+        return;
+      }
+      setDaysOfWeek(daysOfWeek.filter((d) => d !== day));
+    } else {
+      setDaysOfWeek([...daysOfWeek, day]);
+    }
+  };
   const [category, setCategory] = useState<TaskCategory>("discipline");
   const [targetDurationHours, setTargetDurationHours] = useState("02");
   const [targetDurationMinutes, setTargetDurationMinutes] = useState("00");
@@ -102,6 +120,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
       type: taskType,
       category,
       isRoutine,
+      daysOfWeek: isRoutine ? daysOfWeek : undefined,
       date: isRoutine ? undefined : format(selectedDate, "yyyy-MM-dd"),
       target,
       reminderTime: reminderEnabled ? `${reminderHours}:${reminderMinutes}` : undefined,
@@ -174,6 +193,45 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Repeat Days (for Routine Tasks) */}
+        {isRoutine && (
+          <View className="mb-6">
+            <Text className="text-sm font-semibold text-slate-800 mb-3">
+              Repeat Days
+            </Text>
+            <View className="flex-row justify-between">
+              {[
+                { label: "S", value: 0 },
+                { label: "M", value: 1 },
+                { label: "T", value: 2 },
+                { label: "W", value: 3 },
+                { label: "T", value: 4 },
+                { label: "F", value: 5 },
+                { label: "S", value: 6 },
+              ].map((day, idx) => {
+                const isSelected = daysOfWeek.includes(day.value);
+                return (
+                  <TouchableOpacity
+                    key={`${day.value}-${idx}`}
+                    onPress={() => toggleDay(day.value)}
+                    className={`w-10 h-10 rounded-full items-center justify-center border ${isSelected
+                      ? "bg-indigo-600 border-indigo-600"
+                      : "bg-white border-slate-200"
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${isSelected ? "text-white" : "text-slate-500"
+                        }`}
+                    >
+                      {day.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Task Date (for One-Time Tasks) */}
         {!isRoutine && (
@@ -359,17 +417,23 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
 
         {reminderEnabled ? (
           <View className="mb-12">
-            <TimePickerDropdown
-              title="Set Reminder Time"
+            <ClockTimePicker
+              title="Reminder Time"
               hours={reminderHours}
               minutes={reminderMinutes}
-              onHoursChange={setReminderHours}
-              onMinutesChange={setReminderMinutes}
+              onTimeChange={(h, m) => {
+                setReminderHours(h);
+                setReminderMinutes(m);
+              }}
             />
           </View>
         ) : (
           <TouchableOpacity
-            onPress={() => setReminderEnabled(true)}
+            onPress={() => {
+              setReminderHours(new Date().getHours().toString().padStart(2, "0"));
+              setReminderMinutes(new Date().getMinutes().toString().padStart(2, "0"));
+              setReminderEnabled(true)
+            }}
             className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center"
           >
             <Text className="text-slate-400">Add reminder</Text>

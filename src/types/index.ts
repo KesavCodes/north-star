@@ -15,6 +15,7 @@ export interface Task {
   type: TaskType;
   category: TaskCategory;
   isRoutine: boolean;
+  daysOfWeek?: number[]; // [0,1,2,3,4,5,6] (0=Sun, 1=Mon, ..., 6=Sat)
   date?: string; // YYYY-MM-DD for one-time tasks
   target?: number; // duration in seconds for timer, value for counter
   reminderTime?: string; // HH:MM format
