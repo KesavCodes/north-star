@@ -343,16 +343,39 @@ export const AnalyticsScreen = ({ navigation }: any) => {
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4 mb-6">
-        <TouchableOpacity
-          onPress={() => (navigation.canGoBack() ? navigation.goBack() : null)}
-          className="p-2 -ml-2"
-        >
-          {navigation.canGoBack() && <ChevronLeft color="#334155" size={24} />}
-        </TouchableOpacity>
-        <Text className="text-lg font-bold text-slate-800">Insights</Text>
-        <View className="w-8" />
-      </View>
+      {(() => {
+        let canGoBack = false;
+        try {
+          canGoBack = Boolean(navigation && typeof navigation.canGoBack === "function" && navigation.canGoBack());
+        } catch {
+          canGoBack = false;
+        }
+
+        return (
+          <View className="flex-row justify-between items-center px-5 mt-4 mb-6">
+            {canGoBack ? (
+              <TouchableOpacity
+                onPress={() => {
+                  try {
+                    if (navigation?.canGoBack?.()) {
+                      navigation.goBack();
+                    }
+                  } catch (e) {
+                    console.warn("Navigation goBack failed", e);
+                  }
+                }}
+                className="p-2 -ml-2"
+              >
+                <ChevronLeft color="#334155" size={24} />
+              </TouchableOpacity>
+            ) : (
+              <View className="w-8" />
+            )}
+            <Text className="text-lg font-bold text-slate-800">Insights</Text>
+            <View className="w-8" />
+          </View>
+        );
+      })()}
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* Chart type toggle */}

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "../types";
+import { DEFAULT_JOURNAL_TEMPLATES } from "../constants/defaultJournalTemplates";
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 const getLogId = (taskId: string, date: string) => `${taskId}-${date}`;
@@ -17,6 +18,7 @@ export const useStore = create<AppState>()(
       tasks: { routine: [] },
       logs: {},
       journals: {},
+      journalTemplates: DEFAULT_JOURNAL_TEMPLATES,
       activeTimers: {},
 
       getTasksForDate: (date?: string) => {
@@ -329,13 +331,95 @@ export const useStore = create<AppState>()(
           };
         }),
 
-      saveJournal: (entry) =>
+      // Journal Actions
+      addJournalEntry: (entryData) =>
+        set((state) => {
+          const now = Date.now();
+          const newEntry = {
+            ...entryData,
+            id: generateId(),
+            createdAt: now,
+            updatedAt: now,
+          };
+          const list = state.journals[entryData.date] || [];
+          return {
+            journals: {
+              ...state.journals,
+              [entryData.date]: [newEntry, ...list],
+            },
+          };
+        }),
+
+      updateJournalEntry: (id, date, updates) =>
+        set((state) => {
+          const list = state.journals[date] || [];
+          const updatedList = list.map((item) =>
+            item.id === id
+              ? { ...item, ...updates, updatedAt: Date.now() }
+              : item,
+          );
+          return {
+            journals: {
+              ...state.journals,
+              [date]: updatedList,
+            },
+          };
+        }),
+
+      deleteJournalEntry: (id, date) =>
+        set((state) => {
+          const list = state.journals[date] || [];
+          return {
+            journals: {
+              ...state.journals,
+              [date]: list.filter((item) => item.id !== id),
+            },
+          };
+        }),
+
+      // Journal Template Actions
+      addJournalTemplate: (templateData) =>
         set((state) => ({
-          journals: {
-            ...state.journals,
-            [entry.date]: entry,
-          },
+          journalTemplates: [
+            ...state.journalTemplates,
+            {
+              ...templateData,
+              id: generateId(),
+              isDefault: false,
+              createdAt: Date.now(),
+            },
+          ],
         })),
+
+      updateJournalTemplate: (id, updates) =>
+        set((state) => ({
+          journalTemplates: state.journalTemplates.map((t) =>
+            t.id === id && !t.isDefault ? { ...t, ...updates } : t,
+          ),
+        })),
+
+      deleteJournalTemplate: (id) =>
+        set((state) => ({
+          journalTemplates: state.journalTemplates.filter(
+            (t) => t.id !== id || t.isDefault,
+          ),
+        })),
+
+      duplicateJournalTemplate: (id) =>
+        set((state) => {
+          const template = state.journalTemplates.find((t) => t.id === id);
+          if (!template) return state;
+          const copy = {
+            ...template,
+            id: generateId(),
+            name: `${template.name} (Copy)`,
+            isDefault: false,
+            createdAt: Date.now(),
+          };
+          return {
+            journalTemplates: [...state.journalTemplates, copy],
+          };
+        }),
 
       importData: (dataStr: string) => {
         try {
@@ -349,7 +433,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: "north-star-storage-2",
+      name: "north-star-storage-3",
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

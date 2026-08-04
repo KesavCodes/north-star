@@ -1,72 +1,82 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
   Platform,
   StatusBar,
-  KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { useStore } from "../store/useStore";
 import { format, addDays, subDays } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react-native";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Plus,
+  BookOpen,
+} from "lucide-react-native";
 import { useToast } from "../components/ToastProvider";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { JournalEntryCard } from "../components/journal/JournalEntryCard";
+import { JournalEditorModal } from "../components/journal/JournalEditorModal";
+import { JournalEntry } from "../types";
 
 export const JournalScreen = ({ navigation }: any) => {
-  const { journals, saveJournal } = useStore();
+  const { journals, deleteJournalEntry } = useStore();
   const { showToast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const selectedDateStr = format(currentDate, "yyyy-MM-dd");
   const displayDate = format(currentDate, "dd MMM, yyyy");
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const existingEntry = journals[selectedDateStr];
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
 
-  const [dayInBrief, setDayInBrief] = useState(existingEntry?.dayInBrief || "");
-  const [wentWell, setWentWell] = useState(existingEntry?.wentWell || "");
-  const [couldImprove, setCouldImprove] = useState(
-    existingEntry?.couldImprove || "",
-  );
-  const [gratefulFor, setGratefulFor] = useState(
-    existingEntry?.gratefulFor || "",
-  );
+  const dayEntries = journals[selectedDateStr] || [];
+  const hasEntries = dayEntries.length > 0;
 
-  // Re-sync whenever another screen (e.g. DayJournal) saves to the store
-  useEffect(() => {
-    setDayInBrief(existingEntry?.dayInBrief || "");
-    setWentWell(existingEntry?.wentWell || "");
-    setCouldImprove(existingEntry?.couldImprove || "");
-    setGratefulFor(existingEntry?.gratefulFor || "");
-  }, [
-    selectedDateStr,
-    existingEntry?.dayInBrief,
-    existingEntry?.wentWell,
-    existingEntry?.couldImprove,
-    existingEntry?.gratefulFor,
-  ]);
-
-  const handleSave = () => {
-    saveJournal({
-      date: selectedDateStr,
-      dayInBrief,
-      wentWell,
-      couldImprove,
-      gratefulFor,
-    });
-    showToast({
-      type: "success",
-      title: "Journal Saved",
-      body: "Your daily reflection has been saved successfully.",
-    });
-    // If we came from a stack push, go back. Otherwise (if tab), just show a success or do nothing.
-    // if (navigation.canGoBack()) {
-    //   navigation.goBack();
-    // }
+  const handleOpenNewEntry = () => {
+    setActiveEntry(null);
+    setEditorVisible(true);
   };
+
+  const handleOpenEditEntry = (entry: JournalEntry) => {
+    setActiveEntry(entry);
+    setEditorVisible(true);
+  };
+
+  const handleDeleteEntry = (entry: JournalEntry) => {
+    Alert.alert(
+      "Delete Journal Entry",
+      `Are you sure you want to delete "${entry.title}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteJournalEntry(entry.id, selectedDateStr);
+            showToast({
+              title: "Entry Deleted",
+              body: "Journal entry removed.",
+              type: "success",
+            });
+          },
+        },
+      ],
+    );
+  };
+
+  const canGoBack = React.useMemo(() => {
+    try {
+      return Boolean(navigation && typeof navigation.canGoBack === "function" && navigation.canGoBack());
+    } catch {
+      return false;
+    }
+  }, [navigation]);
 
   return (
     <SafeAreaView
@@ -75,125 +85,134 @@ export const JournalScreen = ({ navigation }: any) => {
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       }}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        {/* Header */}
-        <View className="flex-row justify-between items-center px-5 mt-4">
+      {/* Top Header */}
+      <View className="flex-row justify-between items-center px-5 mt-4">
+        {canGoBack ? (
           <TouchableOpacity
-            onPress={() =>
-              navigation.canGoBack() ? navigation.goBack() : null
-            }
-            className="p-2 -ml-2"
-          >
-            {navigation.canGoBack() && (
-              <ChevronLeft color="#334155" size={24} />
-            )}
-          </TouchableOpacity>
-          <View className="items-center">
-            <Text className="text-lg font-bold text-slate-800">
-              Daily Reflection
-            </Text>
-            <View className="flex-row items-center mt-0.5 gap-2">
-              <TouchableOpacity
-                onPress={() => setCurrentDate(subDays(currentDate, 1))}
-              >
-                <ChevronLeft size={14} color="#64748b" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                className="flex-row items-center mx-2 px-2 py-1 rounded-md gap-2 justify-center"
-              >
-                <Calendar size={11} color="#64748b" className="mr-1" />
-                <Text className="text-xs text-slate-600 font-medium">
-                  {displayDate}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setCurrentDate(addDays(currentDate, 1))}
-              >
-                <ChevronRight size={14} color="#64748b" />
-              </TouchableOpacity>
-            </View>
-          </View>
-          {/* Placeholder for centering title */}
-          <View style={{ width: 32 }} />
-        </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={currentDate}
-            mode="date"
-            onChange={(event: any, selectedDate?: Date) => {
-              setShowDatePicker(false);
-              if (selectedDate) {
-                setCurrentDate(selectedDate);
+            onPress={() => {
+              try {
+                if (navigation?.canGoBack?.()) {
+                  navigation.goBack();
+                }
+              } catch (e) {
+                console.warn("Navigation goBack failed", e);
               }
             }}
-          />
+            className="p-2 -ml-2"
+          >
+            <ChevronLeft color="#334155" size={24} />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 32 }} />
         )}
 
-        <ScrollView
-          className="flex-1 px-5 mt-6 mb-20"
-          showsVerticalScrollIndicator={false}
-        >
-          <Text className="text-sm font-semibold text-slate-800 mb-3">
-            Day in Brief
-          </Text>
-          <TextInput
-            multiline
-            value={dayInBrief}
-            onChangeText={setDayInBrief}
-            placeholder="A short summary of today..."
-            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
-            textAlignVertical="top"
-          />
-          <Text className="text-sm font-semibold text-slate-800 mb-3">
-            What went well today?
-          </Text>
-          <TextInput
-            multiline
-            value={wentWell}
-            onChangeText={setWentWell}
-            placeholder="I stayed focused on my work..."
-            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
-            textAlignVertical="top"
-          />
-          <Text className="text-sm font-semibold text-slate-800 mb-3">
-            What could improve?
-          </Text>
-          <TextInput
-            multiline
-            value={couldImprove}
-            onChangeText={setCouldImprove}
-            placeholder="I spent some time on social media..."
-            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
-            textAlignVertical="top"
-          />
-          <Text className="text-sm font-semibold text-slate-800 mb-3">
-            What are you grateful for?
-          </Text>
-          <TextInput
-            multiline
-            value={gratefulFor}
-            onChangeText={setGratefulFor}
-            placeholder="Grateful for my family..."
-            className="bg-white rounded-2xl p-4 mb-3 text-base text-slate-800 border border-slate-100 min-h-[100px]"
-            textAlignVertical="top"
-          />
+        {/* Date Selector Pill */}
+        <View className="flex-row items-center bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
           <TouchableOpacity
-            onPress={handleSave}
-            className="bg-[#2ECC71] rounded-2xl mt-1 py-4 items-center justify-center mb-8 shadow-sm"
+            onPress={() => setCurrentDate(subDays(currentDate, 1))}
+            className="p-1"
           >
-            <Text className="text-white font-bold text-base">
-              Save Reflection
-            </Text>
+            <ChevronLeft size={16} color="#64748b" />
           </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            className="flex-row items-center mx-2"
+          >
+            <Calendar size={12} color="#64748b" />
+            <Text className="text-sm font-semibold text-slate-800 ml-2">
+              {displayDate}
+            </Text>
+            {/* {hasEntries && (
+              <View className="w-2 h-2 rounded-full bg-emerald-500 ml-1.5" />
+            )} */}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setCurrentDate(addDays(currentDate, 1))}
+            className="p-1"
+          >
+            <ChevronRight size={16} color="#64748b" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={handleOpenNewEntry} className="p-2 -mr-2">
+          <Plus color="#334155" size={24} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={currentDate}
+          mode="date"
+          onChange={(event: any, selectedDate?: Date) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setCurrentDate(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      {/* Main Journal Entries List for Day */}
+      <ScrollView
+        className="flex-1 px-5 mt-6"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-lg font-bold text-slate-800">
+            Journal Entries
+          </Text>
+          <Text className="text-xs font-semibold text-slate-400">
+            {dayEntries.length} {dayEntries.length === 1 ? "Entry" : "Entries"}
+          </Text>
+        </View>
+
+        {dayEntries.length > 0 ? (
+          <View className="gap-2">
+            {dayEntries.map((entry) => (
+              <JournalEntryCard
+                key={entry.id}
+                entry={entry}
+                onPress={() => handleOpenEditEntry(entry)}
+                onDelete={() => handleDeleteEntry(entry)}
+              />
+            ))}
+          </View>
+        ) : (
+          <View className="bg-white rounded-3xl p-8 border border-dashed border-slate-200 items-center justify-center shadow-sm my-4">
+            <View className="w-14 h-14 bg-indigo-50 rounded-full items-center justify-center mb-3">
+              <BookOpen color="#6366F1" size={28} />
+            </View>
+            <Text className="text-slate-800 font-bold text-base mb-1">
+              No Journal Entries Yet
+            </Text>
+            <Text className="text-slate-400 font-medium text-xs text-center leading-5 mb-5 max-w-[240px]">
+              Reflect on your day, log your gratitude, or start a new journal entry.
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleOpenNewEntry}
+              className="bg-slate-900 px-5 py-3 rounded-2xl flex-row items-center shadow-sm"
+            >
+              <Plus color="#FFFFFF" size={16} />
+              <Text className="text-white font-semibold text-xs ml-2">
+                Add New Journal Entry
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Editor Modal */}
+      <JournalEditorModal
+        visible={editorVisible}
+        entry={activeEntry}
+        date={selectedDateStr}
+        onClose={() => setEditorVisible(false)}
+      />
     </SafeAreaView>
   );
 };

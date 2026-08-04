@@ -33,12 +33,25 @@ export interface TaskLog {
   sessions?: { startTime: number; endTime: number }[]; // For timer tracking multiple sessions
 }
 
+export interface JournalTemplate {
+  id: string;
+  name: string;
+  icon: string;
+  description?: string;
+  isDefault: boolean;
+  content: string;
+  createdAt?: number;
+}
+
 export interface JournalEntry {
+  id: string;
   date: string; // YYYY-MM-DD
-  dayInBrief: string;
-  wentWell: string;
-  couldImprove: string;
-  gratefulFor: string;
+  title: string;
+  content: string;
+  templateId?: string;
+  mood?: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface UserInfo {
@@ -51,7 +64,8 @@ export interface AppState {
   categories: Category[];
   tasks: Record<string, Task[]>; // keyed by date YYYY-MM-DD or 'routine'
   logs: Record<string, TaskLog>; // keyed by log ID
-  journals: Record<string, JournalEntry>; // keyed by date YYYY-MM-DD
+  journals: Record<string, JournalEntry[]>; // keyed by date YYYY-MM-DD
+  journalTemplates: JournalTemplate[];
 
   activeTimers: Record<string, { taskId: string; date: string; startTime: number }>; // keyed by taskId
 
@@ -62,7 +76,7 @@ export interface AppState {
 
   // Actions
   setUserInfo: (info: UserInfo) => void;
-  
+
   // Category Actions
   addCategory: (category: Omit<Category, "id">) => void;
   updateCategory: (id: string, updates: Partial<Category>) => void;
@@ -88,14 +102,23 @@ export interface AppState {
     completed?: boolean,
   ) => void;
   updateTimerSessions: (
-    taskId: string, 
-    date: string, 
+    taskId: string,
+    date: string,
     sessions: { startTime: number; endTime: number }[]
   ) => void;
   startTimer: (taskId: string, date: string) => void;
   pauseTimer: (taskId: string, date: string) => void;
 
-  saveJournal: (entry: JournalEntry) => void;
+  // Journal Actions
+  addJournalEntry: (entry: Omit<JournalEntry, "id" | "createdAt" | "updatedAt">) => void;
+  updateJournalEntry: (id: string, date: string, updates: Partial<JournalEntry>) => void;
+  deleteJournalEntry: (id: string, date: string) => void;
+
+  // Journal Template Actions
+  addJournalTemplate: (template: Omit<JournalTemplate, "id" | "isDefault">) => void;
+  updateJournalTemplate: (id: string, updates: Partial<JournalTemplate>) => void;
+  deleteJournalTemplate: (id: string) => void;
+  duplicateJournalTemplate: (id: string) => void;
 
   // Data Management
   importData: (data: string) => void;

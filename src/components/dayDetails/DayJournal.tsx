@@ -1,101 +1,118 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useStore } from "../../store/useStore";
 import { useToast } from "../ToastProvider";
+import { JournalEntryCard } from "../journal/JournalEntryCard";
+import { JournalEditorModal } from "../journal/JournalEditorModal";
+import { JournalEntry } from "../../types";
+import { BookOpen, Plus } from "lucide-react-native";
 
 interface Props {
   date: string; // YYYY-MM-DD
 }
 
-const FIELDS: {
-  key: "dayInBrief" | "wentWell" | "couldImprove" | "gratefulFor";
-  label: string;
-  placeholder: string;
-}[] = [
-  {
-    key: "dayInBrief",
-    label: "Day in Brief",
-    placeholder: "Summarise your day in a sentence or two…",
-  },
-  {
-    key: "wentWell",
-    label: "What Went Well",
-    placeholder: "Wins, proud moments, good decisions…",
-  },
-  {
-    key: "couldImprove",
-    label: "Could Improve",
-    placeholder: "Anything you'd do differently…",
-  },
-  {
-    key: "gratefulFor",
-    label: "Grateful For",
-    placeholder: "People, moments, small things…",
-  },
-];
-
 export const DayJournal = ({ date }: Props) => {
-  const { journals, saveJournal } = useStore();
+  const { journals, deleteJournalEntry } = useStore();
   const { showToast } = useToast();
-  const existing = journals[date];
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
 
-  const [values, setValues] = useState({
-    dayInBrief: existing?.dayInBrief ?? "",
-    wentWell: existing?.wentWell ?? "",
-    couldImprove: existing?.couldImprove ?? "",
-    gratefulFor: existing?.gratefulFor ?? "",
-  });
+  const dayEntries = journals[date] || [];
 
-  const handleChange = (key: keyof typeof values, text: string) =>
-    setValues((prev) => ({ ...prev, [key]: text }));
+  const handleOpenNewEntry = () => {
+    setActiveEntry(null);
+    setEditorVisible(true);
+  };
 
-  const handleSave = () => {
-    saveJournal({ date, ...values });
-    showToast({
-      type: "success",
-      title: "Journal Saved",
-      body: "Your daily reflection has been saved successfully.",
-    });
+  const handleOpenEditEntry = (entry: JournalEntry) => {
+    setActiveEntry(entry);
+    setEditorVisible(true);
+  };
+
+  const handleDeleteEntry = (entry: JournalEntry) => {
+    Alert.alert(
+      "Delete Journal Entry",
+      `Are you sure you want to delete "${entry.title}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteJournalEntry(entry.id, date);
+            showToast({
+              title: "Entry Deleted",
+              body: "Journal entry removed.",
+              type: "success",
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
     <ScrollView
       className="flex-1 px-5 mt-6"
-      keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 100 }}
     >
-      {FIELDS.map(({ key, label, placeholder }) => (
-        <View key={key} className="mb-5">
-          <Text className="text-xs font-bold text-slate-500 tracking-wider mb-2">
-            {label.toUpperCase()}
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-sm font-bold text-slate-500 tracking-wider">
+          JOURNAL ENTRIES ({dayEntries.length})
+        </Text>
+        <TouchableOpacity
+          onPress={handleOpenNewEntry}
+          className="flex-row items-center bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100"
+        >
+          <Plus color="#6366F1" size={14} />
+          <Text className="text-xs font-semibold text-indigo-600 ml-1">
+            New Entry
           </Text>
-          <View className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-slate-50">
-            <TextInput
-              multiline
-              placeholder={placeholder}
-              placeholderTextColor="#CBD5E1"
-              value={values[key]}
-              onChangeText={(text) => handleChange(key, text)}
-              className="text-sm text-slate-700 leading-relaxed"
-              textAlignVertical="top"
-              style={{ minHeight: 72 }}
-            />
-          </View>
-        </View>
-      ))}
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity
-        onPress={handleSave}
-        className="bg-[#2ECC71] rounded-2xl py-4 items-center justify-center mb-8 shadow-sm"
-      >
-        <Text className="text-white font-bold text-base">Save Reflection</Text>
-      </TouchableOpacity>
+      {dayEntries.length > 0 ? (
+        <View className="gap-2">
+          {dayEntries.map((entry) => (
+            <JournalEntryCard
+              key={entry.id}
+              entry={entry}
+              onPress={() => handleOpenEditEntry(entry)}
+              onDelete={() => handleDeleteEntry(entry)}
+            />
+          ))}
+        </View>
+      ) : (
+        <View className="bg-white rounded-3xl p-6 border border-dashed border-slate-200 items-center justify-center shadow-sm my-2">
+          <View className="w-12 h-12 bg-indigo-50 rounded-full items-center justify-center mb-3">
+            <BookOpen color="#6366F1" size={24} />
+          </View>
+          <Text className="text-slate-800 font-bold text-base mb-1">
+            No Entries Recorded for this Date
+          </Text>
+          <Text className="text-slate-400 font-medium text-xs text-center leading-5 mb-4">
+            Log reflections, daily gratitude, or notes for this date.
+          </Text>
+          <TouchableOpacity
+            onPress={handleOpenNewEntry}
+            className="bg-slate-900 px-4 py-2.5 rounded-2xl flex-row items-center"
+          >
+            <Plus color="#FFFFFF" size={14} />
+            <Text className="text-white font-semibold text-xs ml-1.5">
+              Add Journal Entry
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Editor Modal */}
+      <JournalEditorModal
+        visible={editorVisible}
+        entry={activeEntry}
+        date={date}
+        onClose={() => setEditorVisible(false)}
+      />
     </ScrollView>
   );
 };
