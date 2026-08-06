@@ -54,6 +54,16 @@ export interface JournalEntry {
   updatedAt: number;
 }
 
+export interface MoodLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: number;
+  mood: "😄" | "🙂" | "😐" | "🙁" | "😭";
+  score: number; // 5=Great, 4=Good, 3=Okay, 2=Bad, 1=Awful
+  tags?: string[];
+  note?: string;
+}
+
 export interface UserInfo {
   name: string;
   profilePic?: string;
@@ -66,6 +76,7 @@ export interface AppState {
   logs: Record<string, TaskLog>; // keyed by log ID
   journals: Record<string, JournalEntry[]>; // keyed by date YYYY-MM-DD
   journalTemplates: JournalTemplate[];
+  moodLogs: Record<string, MoodLog[]>; // keyed by date YYYY-MM-DD
 
   activeTimers: Record<string, { taskId: string; date: string; startTime: number }>; // keyed by taskId
 
@@ -119,6 +130,11 @@ export interface AppState {
   updateJournalTemplate: (id: string, updates: Partial<JournalTemplate>) => void;
   deleteJournalTemplate: (id: string) => void;
   duplicateJournalTemplate: (id: string) => void;
+
+  // Mood Actions
+  addMoodLog: (log: Omit<MoodLog, "id" | "timestamp">) => void;
+  updateMoodLog: (id: string, date: string, updates: Partial<MoodLog>) => void;
+  deleteMoodLog: (id: string, date: string) => void;
 
   // Data Management
   importData: (data: string) => void;

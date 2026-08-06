@@ -10,6 +10,7 @@ import DateRow from "../components/home/DateRow";
 import TodaysOverview from "../components/home/TodaysOverview";
 import QuickActions from "../components/home/QuickActions";
 import CurrentDayTimers from "../components/home/CurrentDayTimers";
+import { HomeMoodCard } from "../components/home/HomeMoodCard";
 
 export const HomeScreen = () => {
   const navigation = useNavigation<any>();
@@ -58,6 +59,8 @@ export const HomeScreen = () => {
         <Greetings />
         {/* Date Row */}
         <DateRow />
+        {/* Mood Tracker Widget */}
+        <HomeMoodCard />
         {/* Motivation Card */}
         {/* <MotivationCard /> */}
         {/* Today's Overview */}

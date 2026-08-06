@@ -19,6 +19,7 @@ export const useStore = create<AppState>()(
       logs: {},
       journals: {},
       journalTemplates: DEFAULT_JOURNAL_TEMPLATES,
+      moodLogs: {},
       activeTimers: {},
 
       getTasksForDate: (date?: string) => {
@@ -418,6 +419,49 @@ export const useStore = create<AppState>()(
           };
           return {
             journalTemplates: [...state.journalTemplates, copy],
+          };
+        }),
+
+      // Mood Actions
+      addMoodLog: (logData) =>
+        set((state) => {
+          const now = Date.now();
+          const newLog = {
+            ...logData,
+            id: generateId(),
+            timestamp: now,
+          };
+          const list = state.moodLogs[logData.date] || [];
+          return {
+            moodLogs: {
+              ...state.moodLogs,
+              [logData.date]: [newLog, ...list],
+            },
+          };
+        }),
+
+      updateMoodLog: (id, date, updates) =>
+        set((state) => {
+          const list = state.moodLogs[date] || [];
+          const updatedList = list.map((item) =>
+            item.id === id ? { ...item, ...updates } : item,
+          );
+          return {
+            moodLogs: {
+              ...state.moodLogs,
+              [date]: updatedList,
+            },
+          };
+        }),
+
+      deleteMoodLog: (id, date) =>
+        set((state) => {
+          const list = state.moodLogs[date] || [];
+          return {
+            moodLogs: {
+              ...state.moodLogs,
+              [date]: list.filter((item) => item.id !== id),
+            },
           };
         }),
 

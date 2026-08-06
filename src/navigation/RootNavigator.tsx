@@ -13,6 +13,7 @@ import { AddCategoryScreen } from "../screens/AddCategoryScreen";
 import { ManageCategoriesScreen } from "../screens/ManageCategoriesScreen";
 import { RemindersScreen } from "../screens/RemindersScreen";
 import { AboutScreen } from "../screens/AboutScreen";
+import { MoodLogScreen } from "../screens/MoodLogScreen";
 import { useStore } from "../store/useStore";
 
 const Stack = createNativeStackNavigator();
@@ -47,6 +48,7 @@ export const RootNavigator = () => {
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
           <Stack.Screen name="RemindersScreen" component={RemindersScreen} />
           <Stack.Screen name="AboutScreen" component={AboutScreen} />
+          <Stack.Screen name="MoodLogScreen" component={MoodLogScreen} />
         </>
       )}
     </Stack.Navigator>
