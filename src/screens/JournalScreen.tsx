@@ -124,7 +124,7 @@ export const JournalScreen = ({ navigation }: any) => {
               {displayDate}
             </Text>
             {/* {hasEntries && (
-              <View className="w-2 h-2 rounded-full bg-emerald-500 ml-1.5" />
+              <View className="w-2 h-2 rounded-full bg-teal-500 ml-1.5" />
             )} */}
           </TouchableOpacity>
 

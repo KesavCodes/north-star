@@ -185,13 +185,6 @@ export const MoodLogScreen = ({ navigation }: any) => {
                           <Text className="text-base font-bold text-slate-800 mr-2">
                             Feeling {themeInfo.label}
                           </Text>
-                          {/* <View
-                            className={`px-2 py-0.5 rounded-full border ${themeInfo.badgeBg}`}
-                          >
-                            <Text className="text-[10px] font-bold">
-                              {themeInfo.scoreText}
-                            </Text>
-                          </View> */}
                         </View>
 
                         <View className="flex-row items-center mt-1">

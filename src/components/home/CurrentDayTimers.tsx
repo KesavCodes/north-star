@@ -93,7 +93,7 @@ const CurrentDayTimers = () => {
                 onPress={() =>
                   navigation.navigate("TimerScreen", { taskId: task.id })
                 }
-                className={`rounded-3xl p-4 shadow-sm border ${
+                className={`rounded-3xl p-5 mb-3.5 shadow-sm border ${
                   isRunning
                     ? "bg-slate-900 border-slate-800"
                     : "bg-white border-slate-100"
