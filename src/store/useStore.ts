@@ -182,6 +182,33 @@ export const useStore = create<AppState>()(
           };
         }),
 
+      setTaskValue: (taskId, date, value, completed) =>
+        set((state) => {
+          const logId = getLogId(taskId, date);
+          const existingLog = state.logs[logId] || {
+            id: logId,
+            taskId,
+            date,
+            value: 0,
+            completed: false,
+          };
+          const targetTask = get().getTaskById(taskId);
+          const target = targetTask?.target || 1;
+          const isCompleted =
+            completed !== undefined ? completed : value >= target;
+
+          return {
+            logs: {
+              ...state.logs,
+              [logId]: {
+                ...existingLog,
+                value: Math.max(value, 0),
+                completed: isCompleted,
+              },
+            },
+          };
+        }),
+
       setTaskCompleted: (taskId, date, completed) =>
         set((state) => {
           const logId = getLogId(taskId, date);

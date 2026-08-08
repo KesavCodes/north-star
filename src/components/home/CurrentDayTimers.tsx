@@ -63,9 +63,9 @@ const CurrentDayTimers = () => {
           <Text className="text-slate-400 font-medium text-xs text-center mb-3">
             Add focus timer tasks to track your productivity daily.
           </Text>
-          <View className="flex-row items-center bg-indigo-600 px-4 py-2 rounded-full">
+          <View className="flex-row items-center justify-center bg-indigo-600 px-4 py-2 rounded-full">
             <Plus color="#FFFFFF" size={14} />
-            <Text className="text-white font-semibold text-xs ml-1">
+            <Text className="text-white font-semibold text-xs ml-1 w-[80px]">
               Add Timer Task
             </Text>
           </View>
@@ -93,11 +93,10 @@ const CurrentDayTimers = () => {
                 onPress={() =>
                   navigation.navigate("TimerScreen", { taskId: task.id })
                 }
-                className={`rounded-3xl p-5 mb-3.5 shadow-sm border ${
-                  isRunning
-                    ? "bg-slate-900 border-slate-800"
-                    : "bg-white border-slate-100"
-                }`}
+                className={`rounded-3xl p-5 mb-3.5 shadow-sm border ${isRunning
+                  ? "bg-slate-900 border-slate-800"
+                  : "bg-white border-slate-100"
+                  }`}
               >
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center flex-1 mr-3">
@@ -111,17 +110,15 @@ const CurrentDayTimers = () => {
                     </View>
                     <View className="flex-1">
                       <Text
-                        className={`font-semibold text-base ${
-                          isRunning ? "text-white" : "text-slate-800"
-                        }`}
+                        className={`font-semibold text-base ${isRunning ? "text-white" : "text-slate-800"
+                          }`}
                         numberOfLines={1}
                       >
                         {task.name}
                       </Text>
                       <Text
-                        className={`text-xs font-medium ${
-                          isRunning ? "text-slate-400" : "text-slate-500"
-                        }`}
+                        className={`text-xs font-medium ${isRunning ? "text-slate-400" : "text-slate-500"
+                          }`}
                       >
                         {formatDigitalTime(elapsed)} / {formatDuration(target)}
                       </Text>

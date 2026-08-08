@@ -12,17 +12,19 @@ import {
 import { useStore } from "../store/useStore";
 import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format, parseISO } from "date-fns";
-import { ChevronLeft, CheckCircle2, Info, XCircle, Plus } from "lucide-react-native";
+import { ChevronLeft, CheckCircle2, Info, XCircle, Plus, Minus } from "lucide-react-native";
 import { DayJournal } from "../components/dayDetails/DayJournal";
 
 export const DayDetailsScreen = ({ route, navigation }: any) => {
   const [activeTab, setActiveTab] = useState<"overview" | "journal">(
     "overview",
   );
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingHabits, setIsEditingHabits] = useState(false);
+  const [isEditingCounters, setIsEditingCounters] = useState(false);
   const [editedLogs, setEditedLogs] = useState<Record<string, boolean>>({});
+  const [editedCounterLogs, setEditedCounterLogs] = useState<Record<string, number>>({});
   const { date } = route.params || { date: format(new Date(), "yyyy-MM-dd") };
-  const { logs, getTasksForDate, setTaskCompleted, activeTimers } = useStore();
+  const { logs, getTasksForDate, setTaskCompleted, setTaskValue, activeTimers } = useStore();
   const [tick, setTick] = useState(0);
 
   React.useEffect(() => {
@@ -52,7 +54,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -110,11 +112,11 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
 
       {activeTab === "overview" ? (
         <ScrollView
-          className="flex-1 px-5 mt-6"
+          className="flex-1 px-5 mt-5"
           showsVerticalScrollIndicator={false}
         >
           {/* Summary Row */}
-          <View className="flex-row justify-between mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-50">
+          <View className="flex-row justify-between mb-5 bg-white px-5 py-3 rounded-3xl shadow-xs border border-slate-100">
             <View className="items-center">
               <Text className="text-[10px] font-bold text-slate-400">
                 Habits
@@ -141,7 +143,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
             </View>
             <View className="items-center">
               <Text className="text-[10px] font-bold text-slate-400">
-                Metrics
+                Counters
               </Text>
               <Text className="text-sm font-semibold text-slate-800 mt-1">
                 {
@@ -151,7 +153,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                 /{counters.length}
               </Text>
             </View>
-            <View className="items-center">
+            {/* <View className="items-center">
               <Text className="text-[10px] font-bold text-slate-400">
                 Kindness
               </Text>
@@ -164,10 +166,10 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                   ).length
                 }
               </Text>
-            </View>
+            </View> */}
           </View>
 
-          <Text className="text-sm font-bold text-slate-800 mb-4">
+          <Text className="text-sm font-bold text-slate-800 mb-2">
             Completed Tasks
           </Text>
 
@@ -179,28 +181,28 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
               </Text>
               <TouchableOpacity
                 className="px-4 py-1.5 rounded-full"
-                style={{ backgroundColor: isEditing ? "#2ECC71" : "#1e293b" }}
+                style={{ backgroundColor: isEditingHabits ? "#2ECC71" : "#1e293b" }}
                 onPress={() => {
-                  if (isEditing) {
+                  if (isEditingHabits) {
                     Object.entries(editedLogs).forEach(
                       ([taskId, completed]) => {
                         setTaskCompleted(taskId, date, completed);
                       },
                     );
-                    setIsEditing(false);
+                    setIsEditingHabits(false);
                     setEditedLogs({});
                   } else {
-                    setIsEditing(true);
+                    setIsEditingHabits(true);
                     setEditedLogs({});
                   }
                 }}
               >
                 <Text className="text-xs font-bold text-white">
-                  {isEditing ? "Save" : "Edit"}
+                  {isEditingHabits ? "Save" : "Edit"}
                 </Text>
               </TouchableOpacity>
             </View>
-            {isEditing && (
+            {isEditingHabits && (
               <View className="flex-row items-center mb-3">
                 <Info color="#94A3B8" size={14} />
                 <Text className="text-xs font-normal text-slate-500 ml-1.5 tracking-wider flex-1">
@@ -208,7 +210,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                 </Text>
               </View>
             )}
-            <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
+            <View className="bg-white rounded-3xl px-5 py-3 shadow-sm border border-slate-50">
               {habits.map((task) => {
                 const logId = `${task.id}-${date}`;
                 const originalCompleted = logs[logId]?.completed || false;
@@ -221,7 +223,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                   <View key={task.id}>
                     <TouchableOpacity
                       className="flex-row items-center py-2 justify-between"
-                      disabled={!isEditing}
+                      disabled={!isEditingHabits}
                       onPress={() => {
                         setEditedLogs((prev) => ({
                           ...prev,
@@ -230,7 +232,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
                       }}
                     >
                       <View className="flex-row items-center">
-                        {isEditing ? (
+                        {isEditingHabits ? (
                           isCompleted ? (
                             <CheckCircle2 color="#94A3B8" size={20} />
                           ) : (
@@ -261,11 +263,11 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
           </View>
 
           {/* Timers Section */}
-          <View className="mb-6">
+          <View className="mb-5">
             <Text className="text-xs font-bold text-slate-500 tracking-wider mb-3">
-              PRODUCTIVITY (TIMER)
+              TIMERS
             </Text>
-            <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
+            <View className="bg-white rounded-3xl px-5 py-3 shadow-sm border border-slate-50 gap-3">
               {timers.map((task) => {
                 const logId = `${task.id}-${date}`;
                 const baseElapsed = logs[logId]?.value || 0;
@@ -309,10 +311,125 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
             </View>
           </View>
 
+          {/* Counters Section */}
+          <View className="mb-5">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-xs font-bold text-slate-500 tracking-wider">
+                COUNTERS
+              </Text>
+              <TouchableOpacity
+                className="px-4 py-1.5 rounded-full"
+                style={{ backgroundColor: isEditingCounters ? "#2ECC71" : "#1e293b" }}
+                onPress={() => {
+                  if (isEditingCounters) {
+                    Object.entries(editedCounterLogs).forEach(
+                      ([taskId, val]) => {
+                        setTaskValue(taskId, date, val);
+                      },
+                    );
+                    setIsEditingCounters(false);
+                    setEditedCounterLogs({});
+                  } else {
+                    setIsEditingCounters(true);
+                    setEditedCounterLogs({});
+                  }
+                }}
+              >
+                <Text className="text-xs font-bold text-white">
+                  {isEditingCounters ? "Save" : "Edit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View className="bg-white rounded-3xl px-5 py-3 shadow-sm border border-slate-50 gap-3">
+              {counters.map((task) => {
+                const logId = `${task.id}-${date}`;
+                const originalValue = logs[logId]?.value || 0;
+                const value =
+                  editedCounterLogs[task.id] !== undefined
+                    ? editedCounterLogs[task.id]
+                    : originalValue;
+                const target = Math.max(task.target || 1, 1);
+                const progress = Math.min(
+                  Math.max((value / target) * 100, 0),
+                  100,
+                );
+                const isTargetReached = value >= target;
+
+                return (
+                  <View key={task.id} className="py-2.5 border-b border-slate-50">
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-sm text-slate-700 font-medium flex-1 mr-3">
+                        {task.name}
+                      </Text>
+
+                      {isEditingCounters ? (
+                        <View className="flex-row items-center space-x-2">
+                          <TouchableOpacity
+                            onPress={() =>
+                              setEditedCounterLogs((prev) => ({
+                                ...prev,
+                                [task.id]: Math.max(value - 1, 0),
+                              }))
+                            }
+                            disabled={value <= 0}
+                            className={`w-7 h-7 rounded-full items-center justify-center border ${value <= 0
+                              ? "bg-slate-100 border-slate-200"
+                              : "bg-red-50 border-red-200"
+                              }`}
+                          >
+                            <Minus color={value <= 0 ? "#CBD5E1" : "#EF4444"} size={14} />
+                          </TouchableOpacity>
+
+                          <Text className="text-sm font-bold text-slate-800 w-10 text-center">
+                            {value}
+                          </Text>
+
+                          <TouchableOpacity
+                            onPress={() =>
+                              setEditedCounterLogs((prev) => ({
+                                ...prev,
+                                [task.id]: value + 1,
+                              }))
+                            }
+                            className="w-7 h-7 rounded-full items-center justify-center bg-teal-50 border border-teal-200"
+                          >
+                            <Plus color="#0F766E" size={14} />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View className="flex-row items-center">
+                          <Text className="text-xs text-slate-500 font-semibold mr-1.5">
+                            {value} / {target}
+                          </Text>
+                          {isTargetReached && (
+                            <CheckCircle2 color="#2ECC71" size={16} />
+                          )}
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Progress Bar (capped at 100%) */}
+                    <View className="h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                      <View
+                        className={`h-full rounded-full`}
+                        style={{ width: `${progress}%`, backgroundColor: isTargetReached ? "#2ECC71" : "#1e293b" }}
+                      />
+                    </View>
+                  </View>
+                );
+              })}
+              {counters.length === 0 && (
+                <Text className="text-slate-400 text-xs">
+                  No counters tracked.
+                </Text>
+              )}
+            </View>
+          </View>
+
           {/* Add Task for this Day Button */}
           <TouchableOpacity
             onPress={() => navigation.navigate("AddTaskScreen", { initialDate: date })}
-            className="bg-slate-800 rounded-2xl py-4 flex-row items-center justify-center mb-8 shadow-sm"
+            className="bg-slate-800 rounded-2xl py-4 flex-row items-center justify-center mb-20 shadow-sm"
           >
             <Plus color="#FFFFFF" size={20} />
             <Text className="text-white font-semibold text-base ml-2">
