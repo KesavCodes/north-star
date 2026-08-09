@@ -11,7 +11,7 @@ const DateRow = () => {
   const navigation = useNavigation<any>();
   const today = format(new Date(), "dd MMM, yyyy");
   return (
-    <View className="flex-row justify-between items-center mt-8">
+    <View className="flex-row justify-between items-center mt-5">
       <View>
         <View className="flex-row items-center">
           <Text className="text-lg font-bold text-slate-800">Today</Text>

@@ -71,7 +71,7 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -90,14 +90,14 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <View className="bg-white rounded-3xl p-2 shadow-sm border border-slate-50">
+        <View className="bg-white rounded-3xl p-2 shadow-xs border border-slate-100">
           {categories.map((category, index) => (
             <View key={category.id}>
-              <View className="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center justify-between py-3 px-2">
                 <View className="flex-row items-center flex-1">
                   <View
                     className="w-10 h-10 rounded-full items-center justify-center mr-3"

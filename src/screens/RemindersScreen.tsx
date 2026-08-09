@@ -12,9 +12,11 @@ import {
 import { useStore } from "../store/useStore";
 import { ChevronLeft, BellOff, Clock, Trash2 } from "lucide-react-native";
 import { cancelTaskReminder } from "../utils/notifications";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Task } from "../types";
 
 export const RemindersScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { tasks, updateTask, categories } = useStore();
 
   const activeReminders = useMemo(() => {
@@ -51,10 +53,11 @@ export const RemindersScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4 mb-8">
+      <View className="flex-row justify-between items-center px-5 mt-6 mb-5">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -67,7 +70,10 @@ export const RemindersScreen = ({ navigation }: any) => {
         <View className="w-8" />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-5"
+        showsVerticalScrollIndicator={false}
+      >
         {activeReminders.length === 0 ? (
           <View className="flex-1 items-center justify-center mt-20">
             <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
@@ -81,7 +87,7 @@ export const RemindersScreen = ({ navigation }: any) => {
             </Text>
           </View>
         ) : (
-          <View className="bg-white rounded-3xl p-2 shadow-sm border border-slate-50 mb-12">
+          <View className="bg-white rounded-3xl py-2 shadow-xs border border-slate-100 mb-8">
             {activeReminders.map((task, index) => {
               const categoryInfo = getCategoryInfo(task.category);
               return (

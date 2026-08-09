@@ -25,9 +25,9 @@ export const HomeMoodCard: React.FC = () => {
   };
 
   return (
-    <View className="mt-6">
+    <View className="mt-5">
       {/* Widget Header Row */}
-      <View className="flex-row items-center justify-between mb-2.5 px-1">
+      <View className="flex-row items-center justify-between mb-2">
         <View className="flex-row items-center">
           <Text className="text-lg font-bold text-slate-800">Mood Tracker</Text>
           {todayLogs.length > 0 && (
@@ -52,7 +52,7 @@ export const HomeMoodCard: React.FC = () => {
       {latestLog ? (
         <TouchableOpacity
           onPress={handleNavigateToLogScreen}
-          className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex-row items-center justify-between"
+          className="bg-white rounded-3xl p-2 border border-slate-100 shadow-sm flex-row items-center justify-between"
         >
           <View className="flex-row items-center flex-1 mr-3">
             <View className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 items-center justify-center mr-3.5">
@@ -96,7 +96,7 @@ export const HomeMoodCard: React.FC = () => {
       ) : (
         <TouchableOpacity
           onPress={handleNavigateToLogScreen}
-          className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex-row items-center justify-between"
+          className="bg-white rounded-3xl p-2 border border-slate-100 shadow-sm flex-row items-center justify-between"
         >
           <View className="flex-row items-center flex-1 mr-2">
             <View className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 items-center justify-center mr-3.5">

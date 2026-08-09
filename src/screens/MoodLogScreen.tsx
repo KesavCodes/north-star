@@ -20,10 +20,12 @@ import {
   Edit2,
 } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MoodLogModal } from "../components/mood/MoodLogModal";
 import { MoodLog } from "../types";
 
 export const MoodLogScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { moodLogs } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const selectedDateStr = format(currentDate, "yyyy-MM-dd");
@@ -63,10 +65,11 @@ export const MoodLogScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Top Navigation Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4 mb-3">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         {canGoBack ? (
           <TouchableOpacity
             onPress={() => {
@@ -97,7 +100,7 @@ export const MoodLogScreen = ({ navigation }: any) => {
       </View>
 
       {/* Date Selector Row */}
-      <View className="flex-row items-center justify-between px-5 py-2 mb-2">
+      <View className="flex-row items-center justify-between px-5 py-5">
         <TouchableOpacity
           onPress={() => setCurrentDate(subDays(currentDate, 1))}
           className="p-2 bg-white rounded-xl border border-slate-100 shadow-xs"
@@ -140,7 +143,7 @@ export const MoodLogScreen = ({ navigation }: any) => {
 
       {/* Daily Mood List Scroll Area */}
       <ScrollView
-        className="flex-1 px-5 pt-3"
+        className="flex-1 px-5 pt-2"
         showsVerticalScrollIndicator={false}
       >
         {hasLogs ? (
@@ -169,7 +172,7 @@ export const MoodLogScreen = ({ navigation }: any) => {
                 <TouchableOpacity
                   key={log.id}
                   onPress={() => handleOpenEditMood(log)}
-                  className="bg-white rounded-3xl p-5 mb-4 border border-slate-100 shadow-sm flex-col justify-between"
+                  className="bg-white rounded-3xl px-5 py-3.5 mb-2 border border-slate-100 shadow-sm flex-col justify-between"
                 >
                   {/* Card Header: Avatar, Feeling & Time */}
                   <View className="flex-row items-center justify-between mb-3">

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, TouchableOpacity, AppState } from "react-native";
 import { ScreenWrapper } from "../components/ScreenWrapper";
-import { Bell, Menu } from "lucide-react-native";
+import { Bell } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 import Greetings from "../components/home/Greetings";
 import DateRow from "../components/home/DateRow";
 // import MotivationCard from "../components/home/MotivationCard";
@@ -15,6 +16,7 @@ import { HomeMoodCard } from "../components/home/HomeMoodCard";
 export const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const [hasUnread, setHasUnread] = useState(false);
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   const checkNotifications = async () => {
     try {
@@ -38,13 +40,19 @@ export const HomeScreen = () => {
     return () => sub.remove();
   }, []);
   return (
-    <ScreenWrapper className="flex-1 bg-[#F8F9FA]">
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+    <ScreenWrapper className="flex-1 bg-[#F8F9FA]" hasTabBar={true}>
+      <ScrollView
+        ref={scrollRef}
+        className="flex-1 px-4"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
-        <View className="flex-row justify-end items-center mt-4">
+        <View className="flex-row justify-between items-center mt-6">
           {/* <TouchableOpacity className="p-2 -ml-2">
             <Menu color="#334155" size={24} />
           </TouchableOpacity> */}
+          {/* Greeting */}
+          <Greetings />
           <TouchableOpacity
             className="p-2 -mr-2"
             onPress={() => navigation.navigate("Notifications")}
@@ -55,8 +63,6 @@ export const HomeScreen = () => {
             )}
           </TouchableOpacity>
         </View>
-        {/* Greeting */}
-        <Greetings />
         {/* Date Row */}
         <DateRow />
         {/* Mood Tracker Widget */}

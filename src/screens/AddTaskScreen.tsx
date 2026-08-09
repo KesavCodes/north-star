@@ -27,14 +27,18 @@ import { format, parseISO } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import TimePickerDropdown from "../components/addTask/TimePickerDropdown";
 import { ClockTimePicker } from "../components/ClockTimePicker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useToast } from "../components/ToastProvider";
 
 export const AddTaskScreen = ({ navigation, route }: any) => {
+  const insets = useSafeAreaInsets();
   const { addTask } = useStore();
   const { showToast } = useToast();
 
   const initialDateStr = route?.params?.initialDate || route?.params?.date;
-  const [taskType, setTaskType] = useState<TaskType>("checkbox");
+  const initialTaskType = route?.params?.type || "checkbox";
+  const initialCategory = route?.params?.category || "discipline";
+  const [taskType, setTaskType] = useState<TaskType>(initialTaskType);
   const [isRoutine, setIsRoutine] = useState(!initialDateStr);
   const [selectedDate, setSelectedDate] = useState<Date>(
     initialDateStr ? parseISO(initialDateStr) : new Date(),
@@ -58,7 +62,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
       setDaysOfWeek([...daysOfWeek, day]);
     }
   };
-  const [category, setCategory] = useState<TaskCategory>("discipline");
+  const [category, setCategory] = useState<TaskCategory>(initialCategory);
   const [targetDurationHours, setTargetDurationHours] = useState("02");
   const [targetDurationMinutes, setTargetDurationMinutes] = useState("00");
   const [targetCount, setTargetCount] = useState("1");
@@ -142,10 +146,11 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 40),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -159,14 +164,14 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
       >
         {/* Frequency */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Frequency
         </Text>
-        <View className="flex-row space-x-4 mb-6 gap-2">
+        <View className="flex-row space-x-4 mb-5 gap-2">
           <TouchableOpacity
             onPress={() => setIsRoutine(true)}
             className={`flex-1 flex-row items-center justify-center p-3 rounded-2xl border ${isRoutine ? "border-indigo-500 bg-indigo-50" : "border-slate-200 bg-white"}`}
@@ -196,7 +201,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
 
         {/* Repeat Days (for Routine Tasks) */}
         {isRoutine && (
-          <View className="mb-6">
+          <View className="mb-5">
             <Text className="text-sm font-semibold text-slate-800 mb-3">
               Repeat Days
             </Text>
@@ -235,7 +240,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
 
         {/* Task Date (for One-Time Tasks) */}
         {!isRoutine && (
-          <View className="mb-6">
+          <View className="mb-5">
             <Text className="text-sm font-semibold text-slate-800 mb-3">
               Task Date
             </Text>
@@ -271,7 +276,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Task Type
         </Text>
-        <View className="flex-row justify-between space-x-3 mb-6 gap-2">
+        <View className="flex-row justify-between space-x-3 mb-5 gap-2">
           <TouchableOpacity
             onPress={() => setTaskType("checkbox")}
             className={`flex-1 flex-col items-center justify-center p-4 rounded-2xl border-2 ${taskType === "checkbox" ? "border-blue-500 bg-blue-50" : "border-slate-100 bg-white"}`}
@@ -324,7 +329,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
           value={name}
           onChangeText={setName}
           placeholder="e.g. Coding, Studying"
-          className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 mb-6"
+          className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 mb-5"
         />
 
         {/* Daily Target */}
@@ -334,7 +339,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
               Daily Target
             </Text>
             {taskType === "timer" ? (
-              <View className="mb-6">
+              <View className="mb-5">
                 <TimePickerDropdown
                   hours={targetDurationHours}
                   minutes={targetDurationMinutes}
@@ -343,8 +348,8 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
                 />
               </View>
             ) : (
-              <View className="bg-white rounded-2xl border border-slate-100 mb-6 flex-row items-center p-2">
-                <Hash color="#94A3B8" size={22} />
+              <View className="bg-white rounded-2xl border border-slate-100 mb-5 flex-row items-center px-2 py-0.5">
+                <Hash color="#94A3B8" size={18} />
                 <TextInput
                   value={targetCount}
                   onChangeText={(val) => setTargetCount(val.replace(/[^0-9]/g, ""))}
@@ -361,7 +366,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
         <Text className="text-sm font-semibold text-slate-800 mb-3">
           Category
         </Text>
-        <View className="flex-row flex-wrap gap-2 mb-6">
+        <View className="flex-row flex-wrap gap-2 mb-5">
           {useStore((state) => state.categories)
             .filter((c) => !c.isArchived)
             .map((cat) => (
@@ -388,7 +393,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
 
         {/* Icon & Color */}
         <Text className="text-sm font-semibold text-slate-800 mb-3">Color</Text>
-        <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-6 flex-row justify-between items-center">
+        <View className="bg-white rounded-2xl px-4 py-3 border border-slate-100 mb-5 flex-row justify-between items-center">
           <View className="flex-row space-x-2 gap-1">
             {colors.map((color) => (
               <TouchableOpacity
@@ -416,7 +421,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
         </View>
 
         {reminderEnabled ? (
-          <View className="mb-12">
+          <View className="mb-16">
             <ClockTimePicker
               title="Reminder Time"
               hours={reminderHours}
@@ -434,7 +439,7 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
               setReminderMinutes(new Date().getMinutes().toString().padStart(2, "0"));
               setReminderEnabled(true)
             }}
-            className="bg-white rounded-2xl p-4 border border-slate-100 mb-12 flex-row justify-between items-center"
+            className="bg-white rounded-2xl p-4 border border-slate-100 mb-16 flex-row justify-between items-center"
           >
             <Text className="text-slate-400">Add reminder</Text>
             <ChevronRight color="#CBD5E1" size={20} />

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Home,
   Calendar,
@@ -23,23 +24,30 @@ const AddTaskPlaceholder = () => null;
 
 export const TabNavigator = ({ navigation }: any) => {
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  const bottomPadding = Math.max(insets.bottom, 8);
+  const tabBarHeight = 58 + bottomPadding;
+
   return (
     <>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: "#2ECC71",
-          tabBarInactiveTintColor: "#95A5A6",
+          tabBarActiveTintColor: "#0F766E",
+          tabBarInactiveTintColor: "#94A3B8",
           tabBarStyle: {
             backgroundColor: "#FFFFFF",
-            borderTopWidth: 0,
-            elevation: 10,
+            borderTopWidth: 1,
+            borderTopColor: "#F1F5F9",
+            elevation: 12,
             shadowColor: "#000",
-            shadowOpacity: 0.1,
+            shadowOpacity: 0.08,
             shadowRadius: 10,
-            height: 70,
-            paddingBottom: 15,
+            height: tabBarHeight,
+            paddingBottom: bottomPadding,
+            paddingTop: 6,
           },
         }}
       >
@@ -101,7 +109,10 @@ export const TabNavigator = ({ navigation }: any) => {
             onPress={() => setShowAddMenu(false)}
             activeOpacity={1}
           />
-          <View className="bg-white rounded-t-3xl p-6 pb-12 shadow-xl">
+          <View
+            className="bg-white rounded-t-3xl p-6 shadow-xl"
+            style={{ paddingBottom: Math.max(insets.bottom + 20, 36) }}
+          >
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-lg font-bold text-slate-800">
                 Create New

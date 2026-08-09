@@ -24,13 +24,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { File } from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 
 export const ProfileScreen = ({ navigation }: any) => {
   const { userInfo, setUserInfo, importData } = useStore();
   const [isNameModalVisible, setIsNameModalVisible] = useState(false);
   const [newName, setNewName] = useState("");
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -44,44 +45,44 @@ export const ProfileScreen = ({ navigation }: any) => {
       setUserInfo({ ...userInfo, profilePic: result.assets[0].uri });
     }
   };
-const handleExport = async () => {
-  try {
-    const data = await AsyncStorage.getItem("north-star-storage-2");
+  const handleExport = async () => {
+    try {
+      const data = await AsyncStorage.getItem("north-star-storage-3");
 
-    if (!data) {
-      Alert.alert("Export Failed", "No data found to export.");
-      return;
-    }
+      if (!data) {
+        Alert.alert("Export Failed", "No data found to export.");
+        return;
+      }
 
-    const permissions =
-      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      const permissions =
+        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-    if (!permissions.granted) {
+      if (!permissions.granted) {
+        Alert.alert(
+          "Export Cancelled",
+          "Please select a folder to save the backup."
+        );
+        return;
+      }
+
+      const fileUri =
+        await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          `north-star-backup-${Date.now()}.json`,
+          "application/json"
+        );
+
+      await FileSystem.writeAsStringAsync(fileUri, data);
+
       Alert.alert(
-        "Export Cancelled",
-        "Please select a folder to save the backup."
+        "Export Successful",
+        "Backup file has been saved successfully."
       );
-      return;
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Export Failed", "Could not export data.");
     }
-
-    const fileUri =
-      await FileSystem.StorageAccessFramework.createFileAsync(
-        permissions.directoryUri,
-        `north-star-backup-${Date.now()}.json`,
-        "application/json"
-      );
-
-    await FileSystem.writeAsStringAsync(fileUri, data);
-
-    Alert.alert(
-      "Export Successful",
-      "Backup file has been saved successfully."
-    );
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Export Failed", "Could not export data.");
-  }
-};
+  };
 
   const handleImport = () => {
     Alert.alert(
@@ -97,8 +98,7 @@ const handleExport = async () => {
               const result = await DocumentPicker.getDocumentAsync();
               if (!result.canceled && result.assets && result.assets.length > 0) {
                 const fileUri = result.assets[0].uri;
-                const file = new File(fileUri);
-                const fileContent = await file.text();
+                const fileContent = await FileSystem.readAsStringAsync(fileUri);
                 console.log(fileContent);
                 importData(fileContent);
                 Alert.alert("Import Successful", "Data restored successfully.");
@@ -121,13 +121,17 @@ const handleExport = async () => {
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-center items-center px-5 mt-4 mb-8">
+      <View className="flex-row justify-center items-center px-5 mt-6 mb-5">
         <Text className="text-lg font-bold text-slate-800">Profile</Text>
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        className="flex-1 px-5"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Card */}
-        <View className="flex-row items-center mb-10">
+        <View className="flex-row items-center mb-5">
           <View className="relative mr-4">
             <TouchableOpacity
               className="w-16 h-16 rounded-full bg-[#2ECC71] items-center justify-center border border-black-200 overflow-hidden"
@@ -149,7 +153,7 @@ const handleExport = async () => {
             </View>
           </View>
           <View>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => {
                 setNewName(userInfo?.name || "");
                 setIsNameModalVisible(true);
@@ -168,7 +172,7 @@ const handleExport = async () => {
         </View>
 
         {/* Settings List */}
-        <View className="bg-white rounded-3xl p-2 mb-12 shadow-sm border border-slate-50">
+        <View className="bg-white rounded-3xl p-2 mb-8 shadow-xs border border-slate-100">
           {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
               <ListTodo color="#64748b" size={20} />
@@ -244,7 +248,7 @@ const handleExport = async () => {
             </View>
             <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
-          <View className="h-[1px] bg-slate-100 ml-12" />
+          {/* <View className="h-[1px] bg-slate-100 ml-12" /> */}
 
           {/* <TouchableOpacity className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">

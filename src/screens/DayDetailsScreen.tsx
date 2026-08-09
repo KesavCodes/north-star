@@ -14,8 +14,11 @@ import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format, parseISO } from "date-fns";
 import { ChevronLeft, CheckCircle2, Info, XCircle, Plus, Minus } from "lucide-react-native";
 import { DayJournal } from "../components/dayDetails/DayJournal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 
 export const DayDetailsScreen = ({ route, navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<"overview" | "journal">(
     "overview",
   );
@@ -26,6 +29,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
   const { date } = route.params || { date: format(new Date(), "yyyy-MM-dd") };
   const { logs, getTasksForDate, setTaskCompleted, setTaskValue, activeTimers } = useStore();
   const [tick, setTick] = useState(0);
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -51,6 +55,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
@@ -112,6 +117,7 @@ export const DayDetailsScreen = ({ route, navigation }: any) => {
 
       {activeTab === "overview" ? (
         <ScrollView
+          ref={scrollRef}
           className="flex-1 px-5 mt-5"
           showsVerticalScrollIndicator={false}
         >

@@ -20,6 +20,7 @@ import {
 } from "lucide-react-native";
 import { useToast } from "../components/ToastProvider";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 import { JournalEntryCard } from "../components/journal/JournalEntryCard";
 import { JournalEditorModal } from "../components/journal/JournalEditorModal";
 import { JournalEntry } from "../types";
@@ -34,6 +35,8 @@ export const JournalScreen = ({ navigation }: any) => {
 
   const [editorVisible, setEditorVisible] = useState(false);
   const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
+
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   const dayEntries = journals[selectedDateStr] || [];
   const hasEntries = dayEntries.length > 0;
@@ -86,7 +89,7 @@ export const JournalScreen = ({ navigation }: any) => {
       }}
     >
       {/* Top Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         {canGoBack ? (
           <TouchableOpacity
             onPress={() => {
@@ -157,11 +160,12 @@ export const JournalScreen = ({ navigation }: any) => {
 
       {/* Main Journal Entries List for Day */}
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        ref={scrollRef}
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <View className="flex-row justify-between items-center mb-4">
+        <View className="flex-row justify-between items-center mb-3">
           <Text className="text-lg font-bold text-slate-800">
             Journal Entries
           </Text>
@@ -171,7 +175,7 @@ export const JournalScreen = ({ navigation }: any) => {
         </View>
 
         {dayEntries.length > 0 ? (
-          <View className="gap-2">
+          <View>
             {dayEntries.map((entry) => (
               <JournalEntryCard
                 key={entry.id}
@@ -182,7 +186,7 @@ export const JournalScreen = ({ navigation }: any) => {
             ))}
           </View>
         ) : (
-          <View className="bg-white rounded-3xl p-8 border border-dashed border-slate-200 items-center justify-center shadow-sm my-4">
+          <View className="bg-white rounded-3xl p-8 border border-dashed border-slate-200 items-center justify-center shadow-sm">
             <View className="w-14 h-14 bg-indigo-50 rounded-full items-center justify-center mb-3">
               <BookOpen color="#6366F1" size={28} />
             </View>

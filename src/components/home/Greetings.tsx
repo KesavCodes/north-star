@@ -30,7 +30,7 @@ const Greetings = () => {
   };
 
   return (
-    <View className="mt-4">
+    <View className="">
       <Text className="text-2xl font-bold text-slate-800">
         {getGreetings()}, {userInfo?.name || "User"} {getEmoji()}
       </Text>

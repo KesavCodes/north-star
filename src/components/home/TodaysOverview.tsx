@@ -50,13 +50,14 @@ const OverviewCard = ({
       onPress={() =>
         navigation.navigate("DailyTracker", { category: category.id })
       }
-      className="flex-row items-center justify-between bg-white rounded-3xl p-4 shadow-sm border-2 mb-3"
+      className="flex-row items-center justify-between bg-white rounded-2xl px-4 py-2.5  shadow-sm border-2 mb-2"
       style={{
         width: "49%",
         borderTopColor: category.color + "15",
         borderLeftColor: "#f1f5f9",
         borderRightColor: category.color + "25",
         borderBottomColor: category.color + "15",
+        height: 60
       }}
     >
       <View className="gap-1 flex-1">
@@ -64,9 +65,9 @@ const OverviewCard = ({
           className="text-sm font-semibold text-slate-800"
           numberOfLines={1}
         >
+          <Text className="text-xs">{category.emoji}</Text>  {" "}
           {category.name}
         </Text>
-        <Text className="text-xs">{category.emoji}</Text>
         <Text className="text-xs text-slate-500 font-medium">
           <Text className="text-sm font-semibold text-slate-800">
             {completedTasks}
@@ -114,12 +115,13 @@ const ShowAllCard = () => {
   return (
     <TouchableOpacity
       onPress={() => navigation.navigate("DailyTracker", { category: "all" })}
-      className="flex-row items-center justify-center bg-white rounded-3xl p-4 shadow-sm border-2 mb-3 border-slate-100"
+      className="flex-row items-center justify-center bg-white rounded-2xl px-4 py-2.5 shadow-sm border-2 mb-3 border-slate-100"
       style={{
         width: "49%",
+        height: 60
       }}
     >
-      <View className="items-center justify-center gap-2">
+      <View className="flex-row items-center justify-between gap-2">
         <View className="w-10 h-10 rounded-full bg-slate-200 items-center justify-center">
           <LayoutGrid color="#64748b" size={20} />
         </View>
@@ -171,8 +173,8 @@ const TodaysOverview = () => {
   };
 
   return (
-    <View className="mt-8">
-      <View className="flex-row justify-between items-center mb-4">
+    <View className="mt-5">
+      <View className="flex-row justify-between items-center mb-2">
         <Text className="text-lg font-bold text-slate-800">
           Today's Overview
         </Text>
@@ -230,11 +232,10 @@ const TodaysOverview = () => {
               {activeCategories.map((category, index) => (
                 <View
                   key={category.id}
-                  className={`flex-row items-center justify-between p-4 ${
-                    index !== activeCategories.length - 1
-                      ? "border-b border-slate-100"
-                      : ""
-                  }`}
+                  className={`flex-row items-center justify-between p-4 ${index !== activeCategories.length - 1
+                    ? "border-b border-slate-100"
+                    : ""
+                    }`}
                 >
                   <View className="flex-row items-center flex-1">
                     <Text className="text-xl mr-3">{category.emoji}</Text>

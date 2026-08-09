@@ -29,11 +29,15 @@ import {
   Flame,
   Heart,
 } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Task } from "../types";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { logs, getTasksForDate, categories } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -162,10 +166,11 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        // paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -177,11 +182,12 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        ref={scrollRef}
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
       >
         {/* Month Selector */}
-        <View className="flex-row justify-between items-center mb-6">
+        <View className="flex-row justify-between items-center mb-5">
           <TouchableOpacity onPress={prevMonth} className="p-2">
             <ChevronLeft color="#334155" size={20} />
           </TouchableOpacity>
@@ -248,7 +254,7 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
         </View>
 
         {/* Legend */}
-        <View className="flex-row justify-between items-center mt-6 pt-6 border-t border-slate-200">
+        <View className="flex-row justify-between items-center pt-5 border-t border-slate-200">
           <View className="flex-row items-center">
             <View className="w-2 h-2 rounded-full bg-[#2ECC71] mr-1" />
             <Text className="text-[10px] text-slate-500">Great Day</Text>
@@ -268,8 +274,8 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
         </View>
 
         {/* Streaks Overview */}
-        <View className="mt-8 mb-8">
-          <Text className="text-base font-bold text-slate-800 mb-4 px-1">
+        <View className="mt-6 mb-4">
+          <Text className="text-base font-bold text-slate-800 mb-3 px-1">
             Current Streaks
           </Text>
           <ScrollView showsHorizontalScrollIndicator={false}>
@@ -279,7 +285,7 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
                 return (
                   <View
                     key={cat.id}
-                    className="bg-white mb-3 w-[49%] rounded-3xl p-5 shadow-sm border border-slate-50"
+                    className="bg-white mb-3 w-[49%] rounded-3xl py-3 px-5 shadow-xs border border-slate-100"
                   >
                     <Text
                       className="text-sm font-bold mb-4"

@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore } from '../store/useStore';
 import { ChevronLeft, Flame, Heart } from 'lucide-react-native';
 import { calculateTaskStreak } from '../utils/streakUtils';
 
 export const StreaksScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { tasks, logs } = useStore();
   
   const allTasks = Object.values(tasks).flat();
@@ -17,7 +19,13 @@ export const StreaksScreen = ({ navigation }: any) => {
   const bestKindnessStreak = 15;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F8F9FA]" style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
+    <SafeAreaView
+      className="flex-1 bg-[#F8F9FA]"
+      style={{
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
+      }}
+    >
       {/* Header */}
       <View className="flex-row justify-between items-center px-5 mt-4 mb-6">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
@@ -27,7 +35,10 @@ export const StreaksScreen = ({ navigation }: any) => {
         <View className="w-8" />
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-5"
+        showsVerticalScrollIndicator={false}
+      >
         
         {/* Main Streaks */}
         <View className="flex-row space-x-4 mb-8">

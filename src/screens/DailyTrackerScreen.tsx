@@ -8,6 +8,8 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
+import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStore } from "../store/useStore";
 import { formatDigitalTime, formatDuration } from "../utils/formatters";
 import { format } from "date-fns";
@@ -23,6 +25,7 @@ import {
 } from "lucide-react-native";
 
 export const DailyTrackerScreen = ({ navigation, route }: any) => {
+  const insets = useSafeAreaInsets();
   const {
     logs,
     setTaskCompleted,
@@ -41,6 +44,8 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
   const [activeCategory, setActiveCategory] = useState(
     route?.params?.category || "all",
   );
+
+  const scrollRef = useResetScrollOnFocus<ScrollView>();
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -72,10 +77,11 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -97,11 +103,11 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
       </View>
 
       {/* Categories Nav */}
-      <View className="px-5 mt-6 pb-2">
+      <View className="px-5 mt-5">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             onPress={() => setActiveCategory("all")}
-            className={`py-2 px-6 rounded-full mr-2 ${activeCategory === "all"
+            className={`py-1.5 px-5 rounded-full mr-2 ${activeCategory === "all"
               ? "bg-slate-800"
               : "bg-white border border-slate-200"
               }`}
@@ -122,7 +128,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                 <TouchableOpacity
                   key={cat.id}
                   onPress={() => setActiveCategory(cat.id)}
-                  className={`py-2 px-6 rounded-full mr-2 ${isActive
+                  className={`py-1.5 px-5 rounded-full mr-2 ${isActive
                     ? "bg-slate-800"
                     : "bg-white border border-slate-200"
                     }`}
@@ -140,21 +146,34 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        ref={scrollRef}
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
       >
         {/* Habits Section */}
-        <View className="mb-8">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xs font-bold text-slate-500 tracking-wider">
-              HABITS
+        <View className="mb-5">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              HABITS ({habits.length})
             </Text>
-            <Text className="text-xs text-slate-400">
-              {habits.length} habits
-            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AddTaskScreen", {
+                  initialDate: todayISO,
+                  type: "checkbox",
+                  category: activeCategory,
+                })
+              }
+              className="flex-row items-center bg-slate-100 px-3 py-1 rounded-full border border-slate-200/60"
+            >
+              <Plus color="#0F766E" size={14} />
+              <Text className="text-xs font-bold text-teal-700 ml-1">
+                Add Habit
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
+          <View className="bg-white rounded-3xl px-5 py-1 shadow-xs border border-slate-100">
             {habits.map((task, index) => {
               const logId = `${task.id}-${todayISO}`;
               const isCompleted = logs[logId]?.completed || false;
@@ -193,17 +212,29 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
         </View>
 
         {/* Timers Section */}
-        <View className="mb-8">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xs font-bold text-slate-500 tracking-wider">
-              PRODUCTIVITY (TIMER)
+        <View className="mb-6">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              TIMERS ({timers.length})
             </Text>
-            <Text className="text-xs text-slate-400">
-              {timers.length} tasks
-            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AddTaskScreen", {
+                  initialDate: todayISO,
+                  type: "timer",
+                  category: activeCategory,
+                })
+              }
+              className="flex-row items-center bg-slate-100 px-3 py-1 rounded-full border border-slate-200/60"
+            >
+              <Plus color="#0F766E" size={14} />
+              <Text className="text-xs font-bold text-teal-700 ml-1">
+                Add Timer
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
+          <View className="bg-white rounded-3xl px-5 py-1 shadow-xs border border-slate-100">
             {timers.map((task, index) => {
               const logId = `${task.id}-${todayISO}`;
               const activeTimer = activeTimers[task.id];
@@ -277,16 +308,28 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
         {/* Counters Section */}
         <View className="mb-12">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xs font-bold text-slate-500 tracking-wider">
-              METRICS (COUNTER)
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              COUNTERS ({counters.length})
             </Text>
-            <Text className="text-xs text-slate-400">
-              {counters.length} tasks
-            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AddTaskScreen", {
+                  initialDate: todayISO,
+                  type: "counter",
+                  category: activeCategory,
+                })
+              }
+              className="flex-row items-center bg-slate-100 px-3 py-1 rounded-full border border-slate-200/60"
+            >
+              <Plus color="#0F766E" size={14} />
+              <Text className="text-xs font-bold text-teal-700 ml-1">
+                Add Counter
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-50">
+          <View className="bg-white rounded-3xl px-5 py-1 shadow-sm border border-slate-50">
             {counters.map((task, index) => {
               const logId = `${task.id}-${todayISO}`;
               const value = logs[logId]?.value || 0;

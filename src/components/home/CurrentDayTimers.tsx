@@ -39,8 +39,8 @@ const CurrentDayTimers = () => {
   };
 
   return (
-    <View className="mt-8 mb-24">
-      <View className="flex-row justify-between items-center mb-4">
+    <View className="mt-5 mb-4">
+      <View className="flex-row justify-between items-center mb-2">
         <Text className="text-lg font-bold text-slate-800">
           Today's Timers
         </Text>
@@ -51,7 +51,7 @@ const CurrentDayTimers = () => {
 
       {timerTasks.length === 0 ? (
         <TouchableOpacity
-          onPress={() => navigation.navigate("AddTaskScreen", { initialDate: todayISO })}
+          onPress={() => navigation.navigate("AddTaskScreen", { initialDate: todayISO, type: "timer" })}
           className="bg-white rounded-3xl p-6 border border-dashed border-slate-200 items-center justify-center shadow-sm"
         >
           <View className="w-12 h-12 bg-indigo-50 rounded-full items-center justify-center mb-3">
@@ -71,7 +71,7 @@ const CurrentDayTimers = () => {
           </View>
         </TouchableOpacity>
       ) : (
-        <View className="gap-3">
+        <View className="gap-2">
           {timerTasks.map((task) => {
             const logId = `${task.id}-${todayISO}`;
             const baseElapsed = logs[logId]?.value || 0;
@@ -93,7 +93,7 @@ const CurrentDayTimers = () => {
                 onPress={() =>
                   navigation.navigate("TimerScreen", { taskId: task.id })
                 }
-                className={`rounded-3xl p-5 mb-3.5 shadow-sm border ${isRunning
+                className={`rounded-3xl px-5 py-3 shadow-sm border ${isRunning
                   ? "bg-slate-900 border-slate-800"
                   : "bg-white border-slate-100"
                   }`}
@@ -110,7 +110,7 @@ const CurrentDayTimers = () => {
                     </View>
                     <View className="flex-1">
                       <Text
-                        className={`font-semibold text-base ${isRunning ? "text-white" : "text-slate-800"
+                        className={`font-semibold text-base mb-1 ${isRunning ? "text-white" : "text-slate-800"
                           }`}
                         numberOfLines={1}
                       >

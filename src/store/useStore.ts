@@ -335,11 +335,17 @@ export const useStore = create<AppState>()(
       updateTimerSessions: (taskId, date, sessions) =>
         set((state) => {
           const logId = getLogId(taskId, date);
-          const existingLog = state.logs[logId];
-          if (!existingLog) return state;
+          const existingLog = state.logs[logId] || {
+            id: logId,
+            taskId,
+            date,
+            value: 0,
+            completed: false,
+            sessions: [],
+          };
 
           const newValue = sessions.reduce(
-            (acc, s) => acc + Math.floor((s.endTime - s.startTime) / 1000),
+            (acc, s) => acc + Math.max(Math.floor((s.endTime - s.startTime) / 1000), 0),
             0
           );
 

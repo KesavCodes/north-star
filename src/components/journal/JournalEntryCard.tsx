@@ -27,7 +27,7 @@ export const JournalEntryCard: React.FC<JournalEntryCardProps> = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-slate-100 flex-col justify-between"
+      className="bg-white rounded-3xl px-5 py-3 mb-2 shadow-sm border border-slate-100 flex-col justify-between"
     >
       {/* Card Header */}
       <View className="flex-row items-center justify-between mb-3">
@@ -60,9 +60,9 @@ export const JournalEntryCard: React.FC<JournalEntryCardProps> = ({
       {previewSnippet ? (
         <Text
           className="text-xs text-slate-500 font-normal leading-5 mb-3 bg-slate-50 p-3 rounded-2xl"
-          numberOfLines={2}
+          numberOfLines={3}
         >
-          {previewSnippet}...
+          {previewSnippet}
         </Text>
       ) : (
         <Text className="text-xs text-slate-400 italic mb-3">

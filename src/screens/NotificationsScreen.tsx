@@ -11,6 +11,7 @@ import {
 import * as Notifications from "expo-notifications";
 import { ChevronLeft, Bell, BellOff, X } from "lucide-react-native";
 import { formatDistanceToNow } from "date-fns";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface NotificationItem {
   identifier: string;
@@ -20,6 +21,7 @@ interface NotificationItem {
 }
 
 export const NotificationsScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useEffect(() => {
@@ -59,10 +61,11 @@ export const NotificationsScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4 mb-6">
+      <View className="flex-row justify-between items-center px-5 mt-6 mb-5">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -98,12 +101,12 @@ export const NotificationsScreen = ({ navigation }: any) => {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.identifier}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
           ItemSeparatorComponent={() => (
             <View className="h-[1px] bg-slate-100 my-1" />
           )}
           renderItem={({ item }) => (
-            <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-slate-50">
+            <View className="bg-white rounded-3xl px-5 py-3 mb-3.5 shadow-xs border border-slate-100">
               <View className="flex-row items-start gap-3">
                 <View className="w-9 h-9 bg-slate-100 rounded-full items-center justify-center mt-0.5">
                   <Bell color="#64748B" size={16} />

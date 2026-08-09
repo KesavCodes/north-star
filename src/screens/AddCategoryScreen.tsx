@@ -10,10 +10,12 @@ import {
   ScrollView,
 } from "react-native";
 import { X, Check } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStore } from "../store/useStore";
 import { useToast } from "../components/ToastProvider";
 
 export const AddCategoryScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { categories, addCategory } = useStore();
   const { showToast } = useToast();
 
@@ -87,10 +89,11 @@ export const AddCategoryScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 mt-4">
+      <View className="flex-row justify-between items-center px-5 mt-6">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 -ml-2"
@@ -106,7 +109,7 @@ export const AddCategoryScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 mt-6"
+        className="flex-1 px-5 mt-5"
         showsVerticalScrollIndicator={false}
       >
         <Text className="text-sm font-semibold text-slate-800 mb-3">
@@ -116,7 +119,8 @@ export const AddCategoryScreen = ({ navigation }: any) => {
           value={name}
           onChangeText={setName}
           placeholder="e.g. Fitness, Learning"
-          className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 mb-6"
+          className="bg-white rounded-2xl p-4 text-base text-slate-800 border border-slate-100 mb-5"
+
         />
 
         <Text className="text-sm font-semibold text-slate-800 mb-3">
@@ -131,7 +135,7 @@ export const AddCategoryScreen = ({ navigation }: any) => {
               /[^\p{Extended_Pictographic}\p{Emoji_Presentation}\u200D\uFE0F\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu,
               "",
             );
-            
+
             if (!emojiOnly) {
               setEmoji("");
               return;
@@ -153,20 +157,20 @@ export const AddCategoryScreen = ({ navigation }: any) => {
           }}
           keyboardType="twitter"
           placeholder="e.g. 🎨"
-          className="bg-white rounded-2xl p-4 text-2xl border border-slate-100 mb-6"
+          className="bg-white rounded-2xl p-4 text-base border border-slate-100 mb-5"
         />
 
         <Text className="text-sm font-semibold text-slate-800 mb-3">Color</Text>
-        <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-6">
-          <View className="flex-row flex-wrap gap-3 justify-center">
+        <View className="bg-white rounded-2xl px-4 py-3 border border-slate-100 mb-5 flex-row justify-between items-center">
+          <View className="flex-row space-x-2 gap-1">
             {colors.map((color) => (
               <TouchableOpacity
                 key={color}
                 onPress={() => setSelectedColor(color)}
-                className="w-10 h-10 rounded-full items-center justify-center"
+                className={`w-8 h-8 rounded-full items-center justify-center`}
                 style={{ backgroundColor: color }}
               >
-                {selectedColor === color && <Check color="#FFF" size={20} />}
+                {selectedColor === color && <Check color="#FFF" size={16} />}
               </TouchableOpacity>
             ))}
           </View>

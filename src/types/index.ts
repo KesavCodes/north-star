@@ -105,6 +105,12 @@ export interface AppState {
     valueIncrement: number,
     completed?: boolean,
   ) => void;
+  setTaskValue: (
+    taskId: string,
+    date: string,
+    value: number,
+    completed?: boolean,
+  ) => void;
   setTaskCompleted: (taskId: string, date: string, completed: boolean) => void;
   addTimerSession: (
     taskId: string,
