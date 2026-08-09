@@ -22,7 +22,8 @@ import {
   ChevronRight,
   Target,
   Flame,
-  Heart,
+  Smile,
+  ShieldCheck,
 } from "lucide-react-native";
 
 export const OnboardingScreen = () => {
@@ -149,38 +150,52 @@ export const OnboardingScreen = () => {
               </View>
               <View className="flex-1">
                 <Text className="text-slate-800 font-bold text-base">
-                  Track Habits & Goals
+                  Habits, Timers & Counters
                 </Text>
                 <Text className="text-slate-500 text-sm mt-0.5">
-                  Build discipline with daily routines and custom timers.
+                  Track daily routines, focus timers, and numeric goals.
+                </Text>
+              </View>
+            </View>
+
+            <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xs flex-row items-center">
+              <View className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 items-center justify-center mr-4">
+                <Smile color="#0F766E" size={24} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-slate-800 font-bold text-base">
+                  Mood & Journaling
+                </Text>
+                <Text className="text-slate-500 text-sm mt-0.5">
+                  Log your daily emotional state and write private reflections.
                 </Text>
               </View>
             </View>
 
             <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xs flex-row items-center">
               <View className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 items-center justify-center mr-4">
-                <Heart color="#F39C12" size={24} />
+                <Flame color="#F59E0B" size={24} />
               </View>
               <View className="flex-1">
                 <Text className="text-slate-800 font-bold text-base">
-                  Practice Kindness
+                  Streaks & Heatmaps
                 </Text>
                 <Text className="text-slate-500 text-sm mt-0.5">
-                  Remember to be kind to others and yourself.
+                  Maintain consistency streaks and visualize monthly progress.
                 </Text>
               </View>
             </View>
 
             <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xs flex-row items-center">
-              <View className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 items-center justify-center mr-4">
-                <Flame color="#EF4444" size={24} />
+              <View className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 items-center justify-center mr-4">
+                <ShieldCheck color="#8B5CF6" size={24} />
               </View>
               <View className="flex-1">
                 <Text className="text-slate-800 font-bold text-base">
-                  Maintain Streaks
+                  100% Offline & Private
                 </Text>
                 <Text className="text-slate-500 text-sm mt-0.5">
-                  Visualize your progress and stay motivated every day.
+                  Your data stays on your device with easy backup import/export.
                 </Text>
               </View>
             </View>
