@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "north-star",
+    "name": "North Star",
     "slug": "north-star",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,7 +22,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.kesav07.northStar"
+      "package": "com.kesav07.northStar",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
