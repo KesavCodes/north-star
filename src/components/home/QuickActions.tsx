@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
-import { BookOpen, TrendingUp } from "lucide-react-native";
+import { BookOpen, Flame } from "lucide-react-native";
 
 const QuickActions = () => {
   const navigation = useNavigation<any>();
@@ -13,7 +13,7 @@ const QuickActions = () => {
       <View className="flex-row">
         <TouchableOpacity
           onPress={() => navigation.navigate("Journal")}
-          className="flex-1 bg-[#F0F5FF] rounded-2xl py-3.5 flex-row items-center justify-center border border-blue-100 mr-1"
+          className="flex-1 bg-blue-50 rounded-2xl py-3.5 flex-row items-center justify-center border border-blue-100 mr-1.5"
         >
           <BookOpen color="#3B82F6" size={18} />
           <Text className="text-sm font-semibold text-blue-600 ml-2">
@@ -22,12 +22,12 @@ const QuickActions = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate("Analytics")}
-          className="flex-1 bg-[#F5F0FF] rounded-2xl py-3.5 flex-row items-center justify-center border border-purple-100 ml-1"
+          onPress={() => navigation.navigate("Streaks")}
+          className="flex-1 bg-amber-50 rounded-2xl py-3.5 flex-row items-center justify-center border border-amber-100 ml-1.5"
         >
-          <TrendingUp color="#8B5CF6" size={18} />
-          <Text className="text-sm font-semibold text-purple-600 ml-2">
-            View Analytics
+          <Flame color="#F59E0B" size={18} />
+          <Text className="text-sm font-semibold text-amber-700 ml-2">
+            View Streaks
           </Text>
         </TouchableOpacity>
       </View>

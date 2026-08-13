@@ -71,6 +71,7 @@ export interface UserInfo {
 
 export interface AppState {
   userInfo: UserInfo | null;
+  firstUsedAt?: number;
   categories: Category[];
   tasks: Record<string, Task[]>; // keyed by date YYYY-MM-DD or 'routine'
   logs: Record<string, TaskLog>; // keyed by log ID

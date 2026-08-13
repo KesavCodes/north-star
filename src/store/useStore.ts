@@ -55,7 +55,11 @@ export const useStore = create<AppState>()(
         return dateTask;
       },
 
-      setUserInfo: (info) => set({ userInfo: info }),
+      setUserInfo: (info) =>
+        set((state) => ({
+          userInfo: info,
+          firstUsedAt: state.firstUsedAt || Date.now(),
+        })),
 
       addCategory: (categoryData) =>
         set((state) => ({

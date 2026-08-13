@@ -32,10 +32,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Task } from "../types";
 import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
+import {
+  calculateTaskStreak,
+  calculateTaskBestStreak,
+} from "../utils/streakUtils";
 
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
-  const { logs, getTasksForDate, categories } = useStore();
+  const { logs, getTasksForDate, categories, tasks, firstUsedAt } = useStore();
+  const routineTasks = useMemo(() => tasks["routine"] || [], [tasks]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const scrollRef = useResetScrollOnFocus<ScrollView>();
 
@@ -63,6 +68,12 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+
+  const getDaysFormatted = (days?: number[]) => {
+    if (!days || days.length === 0 || days.length === 7) return "Daily";
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return days.map((d) => dayNames[d]).join(", ");
+  };
 
   const streaks = useMemo(() => {
     const calc = (category: string) => {
@@ -273,43 +284,130 @@ export const CalendarHeatmapScreen = ({ navigation }: any) => {
           </View>
         </View>
 
-        {/* Streaks Overview */}
-        <View className="mt-6 mb-4">
-          <Text className="text-base font-bold text-slate-800 mb-3 px-1">
-            Current Streaks
-          </Text>
-          <ScrollView showsHorizontalScrollIndicator={false}>
-            <View className="flex-wrap w-full flex-row justify-between">
-              {categories.filter(c => !c.isArchived).map((cat) => {
-                const streak = streaks[cat.id] || { current: 0, best: 0 };
-                return (
-                  <View
-                    key={cat.id}
-                    className="bg-white mb-3 w-[49%] rounded-3xl py-3 px-5 shadow-xs border border-slate-100"
-                  >
-                    <Text
-                      className="text-sm font-bold mb-4"
-                      style={{ color: cat.color }}
-                    >
-                      {cat.name}
-                    </Text>
-                    <View className="flex-row items-center mb-2">
-                      <Text className="text-2xl mr-2">{cat.emoji}</Text>
-                      <Text className="text-3xl font-bold text-slate-800">
-                        {streak.current}{" "}
-                        <Text className="text-base text-slate-500 font-medium">
-                          days
+        {/* Current Streaks Section matching StreaksScreen UI */}
+        <View className="mt-6 mb-12">
+          <View className="flex-row items-center justify-between mb-3 px-1">
+            <Text className="text-base font-bold text-slate-800">
+              Current Streaks ({routineTasks.length})
+            </Text>
+          </View>
+
+          <View className="space-y-3 gap-2">
+            {routineTasks.map((task) => {
+              const currentStreak = calculateTaskStreak(
+                task,
+                logs,
+                undefined,
+                firstUsedAt,
+              );
+              const bestStreak = calculateTaskBestStreak(
+                task,
+                logs,
+                undefined,
+                firstUsedAt,
+              );
+              const categoryInfo = categories.find(
+                (c) => c.id === task.category,
+              ) || {
+                name: "General",
+                color: "#64748B",
+                emoji: "📌",
+              };
+              const isStreakActive = currentStreak > 0;
+
+              return (
+                <View
+                  key={task.id}
+                  className="bg-white rounded-3xl px-4 py-3.5 shadow-xs border border-slate-100"
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center flex-1 mr-3">
+                      <View
+                        className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
+                        style={{
+                          backgroundColor: task.color
+                            ? task.color + "20"
+                            : "#F1F5F9",
+                        }}
+                      >
+                        <Text className="text-base">{categoryInfo.emoji}</Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text
+                          className="text-base font-bold text-slate-800"
+                          numberOfLines={1}
+                        >
+                          {task.name}
                         </Text>
-                      </Text>
+                        <View className="flex-row items-center gap-2 mt-1 flex-wrap">
+                          <View
+                            className="px-2 py-0.5 rounded-md"
+                            style={{
+                              backgroundColor:
+                                (categoryInfo.color || "#64748B") + "18",
+                            }}
+                          >
+                            <Text
+                              className="text-[11px] font-semibold"
+                              style={{
+                                color: categoryInfo.color || "#64748B",
+                              }}
+                              numberOfLines={1}
+                            >
+                              {categoryInfo.name}
+                            </Text>
+                          </View>
+                          <Text
+                            className="text-xs text-slate-400 font-medium"
+                            numberOfLines={1}
+                          >
+                            {getDaysFormatted(task.daysOfWeek)}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                    <Text className="text-xs text-slate-400">
-                      Best: {streak.best} days
-                    </Text>
+
+                    <View className="flex-row items-center">
+                      <View className="items-end mr-3">
+                        <View className="flex-row items-baseline">
+                          <Text className="text-xl font-extrabold text-slate-800">
+                            {currentStreak}{" "}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500">
+                            {currentStreak === 1 ? "day" : "days"}
+                          </Text>
+                        </View>
+                        <Text className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          Best: {bestStreak}d
+                        </Text>
+                      </View>
+                      <View
+                        className={`w-9 h-9 rounded-2xl items-center justify-center ${
+                          isStreakActive
+                            ? "bg-amber-50 border border-amber-100"
+                            : "bg-slate-50 border border-slate-100"
+                        }`}
+                      >
+                        <Flame
+                          color={isStreakActive ? "#F59E0B" : "#94A3B8"}
+                          size={18}
+                          fill={isStreakActive ? "#F59E0B" : "transparent"}
+                        />
+                      </View>
+                    </View>
                   </View>
-                );
-              })}
-            </View>
-          </ScrollView>
+                </View>
+              );
+            })}
+
+            {routineTasks.length === 0 && (
+              <View className="bg-white rounded-3xl p-5 border border-slate-100 items-center justify-center">
+                <Text className="text-slate-400 text-xs font-medium">
+                  No active routine tasks.
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
