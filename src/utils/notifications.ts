@@ -2,7 +2,6 @@ import * as Notifications from "expo-notifications";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -121,13 +120,15 @@ export async function scheduleTaskReminder(taskId: string, taskName: string, tim
   const hour = parseInt(hourStr, 10);
   const minute = parseInt(minuteStr, 10);
 
+  console.log(taskId, taskName, time, date, hour, minute);
   try {
     if (date) {
       // One-time task
       const [year, month, day] = date.split("-").map(Number);
       const triggerDate = new Date(year, month - 1, day, hour, minute);
-      
+
       // Only schedule if it's in the future
+      console.log("One-time task", triggerDate);
       if (triggerDate.getTime() > Date.now()) {
         await Notifications.scheduleNotificationAsync({
           identifier: `task-reminder-${taskId}`,
@@ -142,6 +143,7 @@ export async function scheduleTaskReminder(taskId: string, taskName: string, tim
         });
       }
     } else {
+      console.log("Routine task (Daily)");
       // Routine task (Daily)
       await Notifications.scheduleNotificationAsync({
         identifier: `task-reminder-${taskId}`,
@@ -166,5 +168,23 @@ export async function cancelTaskReminder(taskId: string) {
     await Notifications.cancelScheduledNotificationAsync(`task-reminder-${taskId}`);
   } catch (error) {
     console.warn("Failed to cancel task reminder notification", error);
+  }
+}
+
+export async function getScheduledNotifications() {
+  try {
+    return await Notifications.getAllScheduledNotificationsAsync();
+  } catch (error) {
+    console.warn("Failed to get scheduled notifications", error);
+    return [];
+  }
+}
+
+export async function getActivePresentedNotifications() {
+  try {
+    return await Notifications.getPresentedNotificationsAsync();
+  } catch (error) {
+    console.warn("Failed to get presented notifications", error);
+    return [];
   }
 }
