@@ -71,8 +71,8 @@ const CurrentDayTimers = () => {
           </View>
         </TouchableOpacity>
       ) : (
-        <View className="gap-2">
-          {timerTasks.map((task) => {
+        <View className="bg-white rounded-3xl px-5 py-1 shadow-xs border border-slate-100">
+          {timerTasks.map((task, index) => {
             const logId = `${task.id}-${todayISO}`;
             const baseElapsed = logs[logId]?.value || 0;
             const activeTimer = activeTimers[task.id];
@@ -88,73 +88,70 @@ const CurrentDayTimers = () => {
             const categoryInfo = getCategoryInfo(task.category);
 
             return (
-              <TouchableOpacity
-                key={task.id}
-                onPress={() =>
-                  navigation.navigate("TimerScreen", { taskId: task.id })
-                }
-                className={`rounded-3xl px-5 py-3 shadow-sm border ${isRunning
-                  ? "bg-slate-900 border-slate-800"
-                  : "bg-white border-slate-100"
-                  }`}
-              >
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center flex-1 mr-3">
-                    <View
-                      className="w-8 h-8 rounded-full items-center justify-center mr-3"
-                      style={{
-                        backgroundColor: categoryInfo.color + (isRunning ? "30" : "15"),
-                      }}
-                    >
-                      <Text className="text-sm">{categoryInfo.emoji}</Text>
-                    </View>
-                    <View className="flex-1">
+              <View key={task.id}>
+                <TouchableOpacity
+                  className="py-4"
+                  onPress={() =>
+                    navigation.navigate("TimerScreen", { taskId: task.id })
+                  }
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center flex-1 mr-3">
+                      <View
+                        className="w-8 h-8 rounded-full items-center justify-center mr-3"
+                        style={{
+                          backgroundColor: categoryInfo.color + "20",
+                        }}
+                      >
+                        <Text className="text-sm">{categoryInfo.emoji}</Text>
+                      </View>
                       <Text
-                        className={`font-semibold text-base mb-1 ${isRunning ? "text-white" : "text-slate-800"
-                          }`}
+                        className="text-base font-semibold text-slate-700 flex-1"
                         numberOfLines={1}
                       >
                         {task.name}
                       </Text>
-                      <Text
-                        className={`text-xs font-medium ${isRunning ? "text-slate-400" : "text-slate-500"
-                          }`}
-                      >
+                    </View>
+
+                    <View className="flex-row items-center">
+                      <Text className="text-sm font-semibold text-slate-500 mr-3">
                         {formatDigitalTime(elapsed)} / {formatDuration(target)}
                       </Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          isRunning
+                            ? pauseTimer(task.id, todayISO)
+                            : startTimer(task.id, todayISO)
+                        }
+                        className="bg-[#2ECC71] w-8 h-8 rounded-full items-center justify-center"
+                      >
+                        {isRunning ? (
+                          <Pause color="#FFF" size={14} fill="#FFF" />
+                        ) : (
+                          <Play
+                            color="#FFF"
+                            size={14}
+                            fill="#FFF"
+                            className="ml-0.5"
+                          />
+                        )}
+                      </TouchableOpacity>
                     </View>
                   </View>
 
-                  <TouchableOpacity
-                    onPress={() =>
-                      isRunning
-                        ? pauseTimer(task.id, todayISO)
-                        : startTimer(task.id, todayISO)
-                    }
-                    className="w-10 h-10 rounded-full items-center justify-center shadow-sm"
-                    style={{
-                      backgroundColor: isRunning ? "#EF4444" : "#2ECC71",
-                    }}
-                  >
-                    {isRunning ? (
-                      <Pause color="#FFF" size={18} fill="#FFF" />
-                    ) : (
-                      <Play color="#FFF" size={18} fill="#FFF" className="ml-0.5" />
-                    )}
-                  </TouchableOpacity>
-                </View>
+                  {/* Progress Bar */}
+                  <View className="h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                    <View
+                      className="h-full bg-[#2ECC71] rounded-full"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </View>
+                </TouchableOpacity>
 
-                {/* Progress Bar */}
-                <View className="h-1.5 bg-slate-100/30 rounded-full overflow-hidden">
-                  <View
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${progress}%`,
-                      backgroundColor: isRunning ? "#2ECC71" : categoryInfo.color,
-                    }}
-                  />
-                </View>
-              </TouchableOpacity>
+                {index < timerTasks.length - 1 && (
+                  <View className="h-[1px] bg-slate-100" />
+                )}
+              </View>
             );
           })}
         </View>
