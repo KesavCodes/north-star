@@ -32,20 +32,25 @@ import { useToast } from "../components/ToastProvider";
 
 export const AddTaskScreen = ({ navigation, route }: any) => {
   const insets = useSafeAreaInsets();
-  const { addTask } = useStore();
+  const { addTask, updateTask } = useStore();
   const { showToast } = useToast();
 
-  const initialDateStr = route?.params?.initialDate || route?.params?.date;
-  const initialTaskType = route?.params?.type || "checkbox";
-  const initialCategory = route?.params?.category || "discipline";
+  const taskToEdit = route?.params?.task;
+
+  const initialDateStr = route?.params?.initialDate || route?.params?.date || taskToEdit?.date;
+  const initialTaskType: TaskType = taskToEdit ? taskToEdit.type : (route?.params?.type || "checkbox");
+  const initialCategory: TaskCategory = taskToEdit ? taskToEdit.category : (route?.params?.category || "discipline");
+
   const [taskType, setTaskType] = useState<TaskType>(initialTaskType);
-  const [isRoutine, setIsRoutine] = useState(!initialDateStr);
+  const [isRoutine, setIsRoutine] = useState(taskToEdit ? taskToEdit.isRoutine : !initialDateStr);
   const [selectedDate, setSelectedDate] = useState<Date>(
     initialDateStr ? parseISO(initialDateStr) : new Date(),
   );
-  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([1, 2, 3, 4, 5, 6, 0]);
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>(
+    taskToEdit?.daysOfWeek || [1, 2, 3, 4, 5, 6, 0],
+  );
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(taskToEdit?.name || "");
 
   const toggleDay = (day: number) => {
     if (daysOfWeek.includes(day)) {
@@ -63,16 +68,36 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
     }
   };
   const [category, setCategory] = useState<TaskCategory>(initialCategory);
-  const [targetDurationHours, setTargetDurationHours] = useState("02");
-  const [targetDurationMinutes, setTargetDurationMinutes] = useState("00");
-  const [targetCount, setTargetCount] = useState("1");
-  const [selectedColor, setSelectedColor] = useState("#2ECC71");
-  const [reminderEnabled, setReminderEnabled] = useState(false);
+
+  const initialHours =
+    taskToEdit?.target && taskToEdit.type === "timer"
+      ? Math.floor(taskToEdit.target / 3600).toString().padStart(2, "0")
+      : "02";
+  const initialMinutes =
+    taskToEdit?.target && taskToEdit.type === "timer"
+      ? Math.floor((taskToEdit.target % 3600) / 60).toString().padStart(2, "0")
+      : "00";
+  const initialCount =
+    taskToEdit?.target && taskToEdit.type === "counter"
+      ? taskToEdit.target.toString()
+      : "1";
+
+  const [targetDurationHours, setTargetDurationHours] = useState(initialHours);
+  const [targetDurationMinutes, setTargetDurationMinutes] = useState(initialMinutes);
+  const [targetCount, setTargetCount] = useState(initialCount);
+  const [selectedColor, setSelectedColor] = useState(taskToEdit?.color || "#2ECC71");
+
+  const initialReminderTime = taskToEdit?.reminderTime;
+  const [reminderEnabled, setReminderEnabled] = useState(!!initialReminderTime);
   const [reminderHours, setReminderHours] = useState(
-    new Date().getHours().toString().padStart(2, "0")
+    initialReminderTime
+      ? initialReminderTime.split(":")[0]
+      : new Date().getHours().toString().padStart(2, "0"),
   );
   const [reminderMinutes, setReminderMinutes] = useState(
-    new Date().getMinutes().toString().padStart(2, "0")
+    initialReminderTime
+      ? initialReminderTime.split(":")[1]
+      : new Date().getMinutes().toString().padStart(2, "0"),
   );
 
   const colors = [
@@ -119,24 +144,52 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
       }
     }
 
-    addTask({
-      name,
-      type: taskType,
-      category,
-      isRoutine,
-      daysOfWeek: isRoutine ? daysOfWeek : undefined,
-      date: isRoutine ? undefined : format(selectedDate, "yyyy-MM-dd"),
-      target,
-      reminderTime: reminderEnabled ? `${reminderHours}:${reminderMinutes}` : undefined,
-      color: selectedColor,
-      icon: "star", // dummy icon for now
-    });
+    if (taskToEdit) {
+      updateTask(
+        taskToEdit.id,
+        {
+          name,
+          type: taskType,
+          category,
+          isRoutine,
+          daysOfWeek: isRoutine ? daysOfWeek : undefined,
+          date: isRoutine ? undefined : format(selectedDate, "yyyy-MM-dd"),
+          target,
+          reminderTime: reminderEnabled
+            ? `${reminderHours}:${reminderMinutes}`
+            : undefined,
+          color: selectedColor,
+        },
+        taskToEdit.date,
+      );
 
-    showToast({
-      title: "Task Added",
-      body: `Successfully added ${name}.`,
-      type: "success",
-    });
+      showToast({
+        title: "Task Updated",
+        body: `Successfully updated ${name}.`,
+        type: "success",
+      });
+    } else {
+      addTask({
+        name,
+        type: taskType,
+        category,
+        isRoutine,
+        daysOfWeek: isRoutine ? daysOfWeek : undefined,
+        date: isRoutine ? undefined : format(selectedDate, "yyyy-MM-dd"),
+        target,
+        reminderTime: reminderEnabled
+          ? `${reminderHours}:${reminderMinutes}`
+          : undefined,
+        color: selectedColor,
+        icon: "star", // dummy icon for now
+      });
+
+      showToast({
+        title: "Task Added",
+        body: `Successfully added ${name}.`,
+        type: "success",
+      });
+    }
 
     navigation.goBack();
   };
@@ -157,7 +210,9 @@ export const AddTaskScreen = ({ navigation, route }: any) => {
         >
           <X color="#334155" size={24} />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-slate-800">Add New Task</Text>
+        <Text className="text-lg font-bold text-slate-800 flex-1 text-center">
+          {taskToEdit ? "Edit Task" : "Add New Task"}
+        </Text>
         <TouchableOpacity onPress={handleSave} className="p-2 -mr-2">
           <Check color="#334155" size={24} />
         </TouchableOpacity>

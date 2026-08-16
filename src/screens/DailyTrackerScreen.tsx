@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useResetScrollOnFocus } from "../hooks/useResetScrollOnFocus";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,7 +23,10 @@ import {
   Pause,
   Plus,
   Minus,
+  MoreVertical,
 } from "lucide-react-native";
+import { Task } from "../types";
+import { TaskOptionsModal } from "../components/TaskOptionsModal";
 
 export const DailyTrackerScreen = ({ navigation, route }: any) => {
   const insets = useSafeAreaInsets();
@@ -35,8 +39,11 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
     startTimer,
     pauseTimer,
     categories,
+    updateTask,
+    deleteTask,
   } = useStore();
   const [tick, setTick] = useState(0);
+  const [selectedTaskForOptions, setSelectedTaskForOptions] = useState<Task | null>(null);
   const todayDateObj = new Date();
   const today = format(todayDateObj, "dd MMM, yyyy");
   const todayISO = format(todayDateObj, "yyyy-MM-dd");
@@ -71,6 +78,25 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
   const habits = activeTasks.filter((t) => t.type === "checkbox");
   const timers = activeTasks.filter((t) => t.type === "timer");
   const counters = activeTasks.filter((t) => t.type === "counter");
+
+  const handleDeleteTask = (task: Task) => {
+    Alert.alert(
+      "Delete Task",
+      `Are you sure you want to delete "${task.name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteTask(task.id, todayISO),
+        },
+      ],
+    );
+  };
+
+  const handleToggleArchive = (task: Task) => {
+    updateTask(task.id, { isArchived: !task.isArchived });
+  };
 
   return (
     <SafeAreaView
@@ -107,14 +133,16 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             onPress={() => setActiveCategory("all")}
-            className={`py-1.5 px-5 rounded-full mr-2 ${activeCategory === "all"
-              ? "bg-slate-800"
-              : "bg-white border border-slate-200"
-              }`}
+            className={`py-1.5 px-5 rounded-full mr-2 ${
+              activeCategory === "all"
+                ? "bg-slate-800"
+                : "bg-white border border-slate-200"
+            }`}
           >
             <Text
-              className={`font-semibold capitalize ${activeCategory === "all" ? "text-white" : "text-slate-600"
-                }`}
+              className={`font-semibold capitalize ${
+                activeCategory === "all" ? "text-white" : "text-slate-600"
+              }`}
             >
               All
             </Text>
@@ -128,14 +156,16 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                 <TouchableOpacity
                   key={cat.id}
                   onPress={() => setActiveCategory(cat.id)}
-                  className={`py-1.5 px-5 rounded-full mr-2 ${isActive
-                    ? "bg-slate-800"
-                    : "bg-white border border-slate-200"
-                    }`}
+                  className={`py-1.5 px-5 rounded-full mr-2 ${
+                    isActive
+                      ? "bg-slate-800"
+                      : "bg-white border border-slate-200"
+                  }`}
                 >
                   <Text
-                    className={`font-semibold capitalize ${isActive ? "text-white" : "text-slate-600"
-                      }`}
+                    className={`font-semibold capitalize ${
+                      isActive ? "text-white" : "text-slate-600"
+                    }`}
                   >
                     {cat.name}
                   </Text>
@@ -180,23 +210,38 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
               return (
                 <View key={task.id}>
-                  <TouchableOpacity
-                    className="flex-row items-center py-3"
-                    onPress={() =>
-                      setTaskCompleted(task.id, todayISO, !isCompleted)
-                    }
-                  >
-                    {isCompleted ? (
-                      <CheckCircle2 color="#2ECC71" size={24} />
-                    ) : (
-                      <Circle color="#CBD5E1" size={24} />
-                    )}
-                    <Text
-                      className={`ml-3 text-base ${isCompleted ? "text-slate-400 line-through" : "text-slate-700"}`}
+                  <View className="flex-row items-center justify-between py-3">
+                    <TouchableOpacity
+                      className="flex-row items-center flex-1 mr-2"
+                      onPress={() =>
+                        setTaskCompleted(task.id, todayISO, !isCompleted)
+                      }
                     >
-                      {task.name}
-                    </Text>
-                  </TouchableOpacity>
+                      {isCompleted ? (
+                        <CheckCircle2 color="#2ECC71" size={24} />
+                      ) : (
+                        <Circle color="#CBD5E1" size={24} />
+                      )}
+                      <Text
+                        className={`ml-3 text-base flex-1 ${
+                          isCompleted
+                            ? "text-slate-400 line-through"
+                            : "text-slate-700"
+                        }`}
+                        numberOfLines={1}
+                      >
+                        {task.name}
+                      </Text>
+                    </TouchableOpacity>
+
+                    {/* Options Button */}
+                    <TouchableOpacity
+                      onPress={() => setSelectedTaskForOptions(task)}
+                      className="p-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                    >
+                      <MoreVertical color="#64748B" size={14} />
+                    </TouchableOpacity>
+                  </View>
                   {index < habits.length - 1 && (
                     <View className="h-[1px] bg-slate-100" />
                   )}
@@ -249,18 +294,24 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
 
               return (
                 <View key={task.id}>
-                  <TouchableOpacity
-                    className="py-4"
-                    onPress={() =>
-                      navigation.navigate("TimerScreen", { taskId: task.id })
-                    }
-                  >
+                  <View className="py-4">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-md font-semibold text-slate-700">
-                        {task.name}
-                      </Text>
+                      <TouchableOpacity
+                        className="flex-row items-center flex-1 mr-2"
+                        onPress={() =>
+                          navigation.navigate("TimerScreen", { taskId: task.id })
+                        }
+                      >
+                        <Text
+                          className="text-md font-semibold text-slate-700 flex-1"
+                          numberOfLines={1}
+                        >
+                          {task.name}
+                        </Text>
+                      </TouchableOpacity>
+
                       <View className="flex-row items-center">
-                        <Text className="text-sm font-semibold text-slate-500 mr-3">
+                        <Text className="text-sm font-semibold text-slate-500 mr-2">
                           {formatDigitalTime(elapsed)} / {formatDuration(target)}
                         </Text>
                         <TouchableOpacity
@@ -269,7 +320,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                               ? pauseTimer(task.id, todayISO)
                               : startTimer(task.id, todayISO)
                           }
-                          className="bg-[#2ECC71] w-8 h-8 rounded-full items-center justify-center"
+                          className="bg-[#2ECC71] w-8 h-8 rounded-full items-center justify-center mr-2"
                         >
                           {isRunning ? (
                             <Pause color="#FFF" size={14} fill="#FFF" />
@@ -282,6 +333,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                             />
                           )}
                         </TouchableOpacity>
+
+                        {/* Options Button */}
+                        <TouchableOpacity
+                          onPress={() => setSelectedTaskForOptions(task)}
+                          className="p-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                        >
+                          <MoreVertical color="#64748B" size={14} />
+                        </TouchableOpacity>
                       </View>
                     </View>
                     {/* Progress Bar */}
@@ -291,7 +350,7 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                         style={{ width: `${progress}%` }}
                       />
                     </View>
-                  </TouchableOpacity>
+                  </View>
                   {index < timers.length - 1 && (
                     <View className="h-[1px] bg-slate-100" />
                   )}
@@ -341,11 +400,14 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                 <View key={task.id}>
                   <View className="py-4">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-md font-semibold text-slate-700">
+                      <Text
+                        className="text-md font-semibold text-slate-700 flex-1 mr-2"
+                        numberOfLines={1}
+                      >
                         {task.name}
                       </Text>
                       <View className="flex-row items-center">
-                        <Text className="text-sm font-semibold text-slate-500 mr-3">
+                        <Text className="text-sm font-semibold text-slate-500 mr-2">
                           {value} / {target}
                         </Text>
                         <TouchableOpacity
@@ -359,7 +421,9 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                               isCompletedForMinus,
                             )
                           }
-                          className={`mr-2 w-8 h-8 rounded-full items-center justify-center ${value <= 0 ? "bg-slate-200" : "bg-red-500"}`}
+                          className={`mr-1.5 w-8 h-8 rounded-full items-center justify-center ${
+                            value <= 0 ? "bg-slate-200" : "bg-red-500"
+                          }`}
                         >
                           <Minus color="#FFF" size={16} />
                         </TouchableOpacity>
@@ -373,9 +437,17 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
                               isCompletedForPlus,
                             )
                           }
-                          className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center"
+                          className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-2"
                         >
                           <Plus color="#FFF" size={16} />
+                        </TouchableOpacity>
+
+                        {/* Options Button */}
+                        <TouchableOpacity
+                          onPress={() => setSelectedTaskForOptions(task)}
+                          className="p-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                        >
+                          <MoreVertical color="#64748B" size={14} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -401,6 +473,17 @@ export const DailyTrackerScreen = ({ navigation, route }: any) => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Task Options Modal */}
+      <TaskOptionsModal
+        visible={!!selectedTaskForOptions}
+        task={selectedTaskForOptions}
+        onClose={() => setSelectedTaskForOptions(null)}
+        onEdit={(task) => navigation.navigate("AddTaskScreen", { task })}
+        onManageRoutine={() => navigation.navigate("ManageRoutinesScreen")}
+        onToggleArchive={handleToggleArchive}
+        onDelete={handleDeleteTask}
+      />
     </SafeAreaView>
   );
 };

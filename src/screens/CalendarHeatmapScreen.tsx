@@ -40,7 +40,10 @@ import {
 export const CalendarHeatmapScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   const { logs, getTasksForDate, categories, tasks, firstUsedAt } = useStore();
-  const routineTasks = useMemo(() => tasks["routine"] || [], [tasks]);
+  const routineTasks = useMemo(
+    () => (tasks["routine"] || []).filter((t) => !t.isArchived),
+    [tasks],
+  );
   const [currentDate, setCurrentDate] = useState(new Date());
   const scrollRef = useResetScrollOnFocus<ScrollView>();
 

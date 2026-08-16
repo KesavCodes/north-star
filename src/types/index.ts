@@ -22,6 +22,7 @@ export interface Task {
   icon?: string;
   color?: string;
   createdAt: number;
+  isArchived?: boolean;
 }
 
 export interface TaskLog {

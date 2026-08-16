@@ -19,6 +19,7 @@ import {
   HardDriveDownload,
   Info,
   Edit,
+  Repeat,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "react-native";
@@ -181,6 +182,20 @@ export const ProfileScreen = ({ navigation }: any) => {
             <ChevronRight color="#CBD5E1" size={20} />
           </TouchableOpacity>
           <View className="h-[1px] bg-slate-100 ml-12" /> */}
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ManageRoutinesScreen")}
+            className="flex-row items-center justify-between p-4"
+          >
+            <View className="flex-row items-center">
+              <Repeat color="#64748b" size={20} />
+              <Text className="text-slate-800 ml-4 text-base">
+                Recurring Tasks
+              </Text>
+            </View>
+            <ChevronRight color="#CBD5E1" size={20} />
+          </TouchableOpacity>
+          <View className="h-[1px] bg-slate-100 ml-12" />
 
           <TouchableOpacity
             onPress={() => navigation.navigate("ManageCategoriesScreen")}

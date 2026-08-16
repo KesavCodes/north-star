@@ -11,6 +11,7 @@ import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { AddCategoryScreen } from "../screens/AddCategoryScreen";
 import { ManageCategoriesScreen } from "../screens/ManageCategoriesScreen";
+import { ManageRoutinesScreen } from "../screens/ManageRoutinesScreen";
 import { RemindersScreen } from "../screens/RemindersScreen";
 import { AboutScreen } from "../screens/AboutScreen";
 import { MoodLogScreen } from "../screens/MoodLogScreen";
@@ -36,6 +37,10 @@ export const RootNavigator = () => {
           <Stack.Screen
             name="ManageCategoriesScreen"
             component={ManageCategoriesScreen}
+          />
+          <Stack.Screen
+            name="ManageRoutinesScreen"
+            component={ManageRoutinesScreen}
           />
           <Stack.Screen name="TimerScreen" component={TimerScreen} />
           <Stack.Screen name="DailyTracker" component={DailyTrackerScreen} />

@@ -20,8 +20,11 @@ export const StreaksScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   const { tasks, logs, categories, firstUsedAt } = useStore();
 
-  // Get all routine tasks
-  const recurringTasks = useMemo(() => tasks["routine"] || [], [tasks]);
+  // Get all active routine tasks
+  const recurringTasks = useMemo(
+    () => (tasks["routine"] || []).filter((t) => !t.isArchived),
+    [tasks],
+  );
 
   // Top streak task (deterministic comparison: highest current streak, tie-broken by best streak)
   const topTask = useMemo(() => {

@@ -23,7 +23,9 @@ export const useStore = create<AppState>()(
       activeTimers: {},
 
       getTasksForDate: (date?: string) => {
-        const routineTasks = get().tasks["routine"] || [];
+        const routineTasks = (get().tasks["routine"] || []).filter(
+          (t) => !t.isArchived,
+        );
         if (!date) return routineTasks;
 
         const dayOfWeek = new Date(`${date}T00:00:00`).getDay();
@@ -32,7 +34,9 @@ export const useStore = create<AppState>()(
           return task.daysOfWeek.includes(dayOfWeek);
         });
 
-        const dateTasks = get().tasks[date] || [];
+        const dateTasks = (get().tasks[date] || []).filter(
+          (t) => !t.isArchived,
+        );
         return [...activeRoutineTasks, ...dateTasks];
       },
 
@@ -133,7 +137,9 @@ export const useStore = create<AppState>()(
           for (const key in newTasks) {
             const index = newTasks[key].findIndex((t) => t.id === taskId);
             if (index !== -1) {
-              newTasks[key][index] = { ...newTasks[key][index], ...updates };
+              const updatedList = [...newTasks[key]];
+              updatedList[index] = { ...updatedList[index], ...updates };
+              newTasks[key] = updatedList;
               break;
             }
           }
