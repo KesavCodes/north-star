@@ -15,6 +15,7 @@ import { ManageRoutinesScreen } from "../screens/ManageRoutinesScreen";
 import { RemindersScreen } from "../screens/RemindersScreen";
 import { AboutScreen } from "../screens/AboutScreen";
 import { MoodLogScreen } from "../screens/MoodLogScreen";
+import { ManageMoodTagsScreen } from "../screens/ManageMoodTagsScreen";
 import { useStore } from "../store/useStore";
 
 const Stack = createNativeStackNavigator();
@@ -54,6 +55,10 @@ export const RootNavigator = () => {
           <Stack.Screen name="RemindersScreen" component={RemindersScreen} />
           <Stack.Screen name="AboutScreen" component={AboutScreen} />
           <Stack.Screen name="MoodLogScreen" component={MoodLogScreen} />
+          <Stack.Screen
+            name="ManageMoodTagsScreen"
+            component={ManageMoodTagsScreen}
+          />
         </>
       )}
     </Stack.Navigator>

@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   Modal,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
 import { MoodLog } from "../../types";
-import { useStore } from "../../store/useStore";
+import { useStore, DEFAULT_MOOD_TAGS } from "../../store/useStore";
 import { useToast } from "../ToastProvider";
-import { theme } from "../../constants/theme";
-import { X, Check, Trash2, Heart } from "lucide-react-native";
+import { X, Check, Trash2, Heart, Plus, Search } from "lucide-react-native";
 
 interface MoodLogModalProps {
   visible: boolean;
@@ -33,26 +31,19 @@ const MOOD_OPTIONS: {
   { emoji: "😭", label: "Awful", score: 1 },
 ];
 
-const AVAILABLE_TAGS = [
-  "Work",
-  "Exercise",
-  "Sleep",
-  "Family",
-  "Health",
-  "Social",
-  "Rest",
-  "Mindfulness",
-  "Hobbies",
-  "Diet",
-];
-
 export const MoodLogModal: React.FC<MoodLogModalProps> = ({
   visible,
   moodLog,
   date,
   onClose,
 }) => {
-  const { addMoodLog, updateMoodLog, deleteMoodLog } = useStore();
+  const {
+    addMoodLog,
+    updateMoodLog,
+    deleteMoodLog,
+    moodTags = DEFAULT_MOOD_TAGS,
+    addMoodTag,
+  } = useStore();
   const { showToast } = useToast();
 
   const [selectedEmoji, setSelectedEmoji] = useState<
@@ -61,6 +52,30 @@ export const MoodLogModal: React.FC<MoodLogModalProps> = ({
   const [selectedScore, setSelectedScore] = useState<number>(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [note, setNote] = useState("");
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+
+  // Combine moodTags from store and any tags present in current log, sorted by stored O(1) count
+  const sortedAllTags = useMemo(() => {
+    const activeTagMap = new Map<string, { name: string; count: number }>();
+
+    moodTags.forEach((t) => {
+      activeTagMap.set(t.name.toLowerCase(), { name: t.name, count: t.count });
+    });
+
+    // Ensure tags from existing log or selected tags are present
+    [...(moodLog?.tags || []), ...selectedTags].forEach((name) => {
+      if (!activeTagMap.has(name.toLowerCase())) {
+        activeTagMap.set(name.toLowerCase(), { name, count: 0 });
+      }
+    });
+
+    const list = Array.from(activeTagMap.values());
+    return list.sort((a, b) => {
+      const countDiff = b.count - a.count;
+      if (countDiff !== 0) return countDiff;
+      return a.name.localeCompare(b.name);
+    });
+  }, [moodTags, moodLog, selectedTags]);
 
   useEffect(() => {
     if (visible) {
@@ -75,6 +90,7 @@ export const MoodLogModal: React.FC<MoodLogModalProps> = ({
         setSelectedTags([]);
         setNote("");
       }
+      setTagSearchQuery("");
     }
   }, [visible, moodLog]);
 
@@ -94,7 +110,42 @@ export const MoodLogModal: React.FC<MoodLogModalProps> = ({
     }
   };
 
+  const handleCreateCustomTag = () => {
+    const trimmed = tagSearchQuery.trim();
+    if (!trimmed) return;
+
+    if (!selectedTags.includes(trimmed)) {
+      setSelectedTags([...selectedTags, trimmed]);
+    }
+    // Save to Zustand store
+    addMoodTag(trimmed);
+    setTagSearchQuery("");
+  };
+
+  const queryTrimmed = tagSearchQuery.trim().toLowerCase();
+  const isSearching = queryTrimmed.length > 0;
+
+  // Filter tags: if NOT searching, show top 10 most used tags. If searching, filter across all.
+  const displayedTags = useMemo(() => {
+    if (!isSearching) {
+      return sortedAllTags.slice(0, 10);
+    }
+    return sortedAllTags.filter((tagObj) =>
+      tagObj.name.toLowerCase().includes(queryTrimmed),
+    );
+  }, [sortedAllTags, queryTrimmed, isSearching]);
+
+  const exactMatchExists = sortedAllTags.some(
+    (t) => t.name.toLowerCase() === queryTrimmed,
+  );
+  const showCreateOption = isSearching && !exactMatchExists;
+
   const handleSave = () => {
+    // Ensure all selected tags exist in store
+    selectedTags.forEach((tag) => {
+      addMoodTag(tag);
+    });
+
     if (moodLog) {
       updateMoodLog(moodLog.id, date, {
         mood: selectedEmoji,
@@ -142,7 +193,7 @@ export const MoodLogModal: React.FC<MoodLogModalProps> = ({
       <View className="flex-1 bg-black/60 justify-end">
         <View className="bg-white rounded-t-3xl p-6 h-[85%] flex-col">
           {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
+          <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-slate-100">
             <View className="flex-row items-center">
               <View className="w-9 h-9 rounded-full bg-teal-50 items-center justify-center mr-2.5">
                 <Heart color="#0F766E" size={18} />
@@ -188,30 +239,90 @@ export const MoodLogModal: React.FC<MoodLogModalProps> = ({
               })}
             </View>
 
-            {/* Life Area Tags */}
-            <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Activities & Context (Optional)
-            </Text>
-            <View className="flex-row flex-wrap gap-2 mb-6">
-              {AVAILABLE_TAGS.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-                return (
+            {/* Life Area Tags Header */}
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Activities & Context ({selectedTags.length})
+              </Text>
+              {!isSearching && (
+                <Text className="text-[11px] font-medium text-slate-400">
+                  Showing Top 10 Most Used
+                </Text>
+              )}
+            </View>
+
+            {/* Selected Tags Chips */}
+            {selectedTags.length > 0 && (
+              <View className="flex-row flex-wrap gap-2 mb-3">
+                {selectedTags.map((tag) => (
                   <TouchableOpacity
                     key={tag}
                     onPress={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full border ${
-                      isSelected
-                        ? "bg-slate-800 border-slate-800"
-                        : "bg-slate-50 border-slate-200"
-                    }`}
+                    className="flex-row items-center bg-slate-800 px-3 py-1.5 rounded-full"
                   >
-                    <Text
-                      className={`text-xs font-semibold ${
-                        isSelected ? "text-white" : "text-slate-600"
-                      }`}
-                    >
-                      {isSelected ? `✓ ${tag}` : tag}
+                    <Text className="text-xs font-semibold text-white mr-1.5">
+                      ✓ {tag}
                     </Text>
+                    <X color="#FFFFFF" size={12} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Search & Custom Tag Input */}
+            <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 mb-3">
+              <Search color="#94A3B8" size={16} className="mr-2" />
+              <TextInput
+                value={tagSearchQuery}
+                onChangeText={setTagSearchQuery}
+                placeholder="Search tags or create new..."
+                placeholderTextColor="#94A3B8"
+                onSubmitEditing={handleCreateCustomTag}
+                returnKeyType="done"
+                className="flex-1 text-sm text-slate-800 p-0 font-medium"
+              />
+              {tagSearchQuery.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setTagSearchQuery("")}
+                  className="p-1"
+                >
+                  <X color="#94A3B8" size={16} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Tags Selection & Add Button */}
+            <View className="flex-row flex-wrap gap-2 mb-6">
+              {showCreateOption && (
+                <TouchableOpacity
+                  onPress={handleCreateCustomTag}
+                  className="flex-row items-center bg-teal-50 border border-teal-300 px-3.5 py-1.5 rounded-full"
+                >
+                  <Plus color="#0F766E" size={14} className="mr-1" />
+                  <Text className="text-xs font-bold text-teal-800">
+                    Add "{tagSearchQuery.trim()}"
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {displayedTags.map((tagObj) => {
+                const isSelected = selectedTags.includes(tagObj.name);
+                if (isSelected) return null;
+
+                return (
+                  <TouchableOpacity
+                    key={tagObj.name}
+                    onPress={() => toggleTag(tagObj.name)}
+                    className="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200 flex-row items-center"
+                  >
+                    <Text className="text-xs font-semibold text-slate-600">
+                      + {tagObj.name}
+                    </Text>
+                    {tagObj.count > 0 && (
+                      <Text className="text-[10px] font-bold text-slate-400 ml-1">
+                        ({tagObj.count})
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 );
               })}

@@ -18,8 +18,10 @@ import {
 } from "lucide-react-native";
 import { useStore } from "../store/useStore";
 import { useToast } from "../components/ToastProvider";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const ManageCategoriesScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const { categories, deleteCategory, tasks, updateCategory } = useStore();
   const { showToast } = useToast();
 
@@ -68,6 +70,7 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
       className="flex-1 bg-[#F8F9FA]"
       style={{
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingBottom: Math.max(insets.bottom, 16),
       }}
     >
       {/* Header */}
@@ -155,7 +158,7 @@ export const ManageCategoriesScreen = ({ navigation }: any) => {
       </ScrollView>
 
       {/* Bottom Fixed Button */}
-      <View className="absolute bottom-2 left-0 right-0 p-5 bg-[#F8F9FA] border-t border-slate-100 pb-8">
+      <View className="absolute bottom-2 left-0 right-0 p-5 bg-[#F8F9FA] border-t border-slate-100 pb-10">
         <TouchableOpacity
           onPress={() => navigation.navigate("AddCategoryScreen")}
           className="bg-slate-800 rounded-2xl py-4 flex-row items-center justify-center"

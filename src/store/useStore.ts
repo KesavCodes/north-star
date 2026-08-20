@@ -1,8 +1,21 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AppState } from "../types";
+import { AppState, MoodTag } from "../types";
 import { DEFAULT_JOURNAL_TEMPLATES } from "../constants/defaultJournalTemplates";
+
+export const DEFAULT_MOOD_TAGS: MoodTag[] = [
+  { id: "tag-work", name: "Work", count: 0 },
+  { id: "tag-exercise", name: "Exercise", count: 0 },
+  { id: "tag-sleep", name: "Sleep", count: 0 },
+  { id: "tag-family", name: "Family", count: 0 },
+  { id: "tag-health", name: "Health", count: 0 },
+  { id: "tag-social", name: "Social", count: 0 },
+  { id: "tag-rest", name: "Rest", count: 0 },
+  { id: "tag-mindfulness", name: "Mindfulness", count: 0 },
+  { id: "tag-hobbies", name: "Hobbies", count: 0 },
+  { id: "tag-diet", name: "Diet", count: 0 },
+];
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 const getLogId = (taskId: string, date: string) => `${taskId}-${date}`;
@@ -13,13 +26,14 @@ export const useStore = create<AppState>()(
       userInfo: null,
       categories: [
         { id: "discipline", name: "Discipline", color: "#2ECC71", emoji: "💚" },
-        { id: "kindness", name: "Kindness", color: "#F39C12", emoji: "❤️" }
+        { id: "kindness", name: "Kindness", color: "#F39C12", emoji: "❤️" },
       ],
       tasks: { routine: [] },
       logs: {},
       journals: {},
       journalTemplates: DEFAULT_JOURNAL_TEMPLATES,
       moodLogs: {},
+      moodTags: DEFAULT_MOOD_TAGS,
       activeTimers: {},
 
       getTasksForDate: (date?: string) => {
@@ -475,36 +489,157 @@ export const useStore = create<AppState>()(
             timestamp: now,
           };
           const list = state.moodLogs[logData.date] || [];
+
+          // Increment tag counts O(1)
+          const currentTags = state.moodTags || DEFAULT_MOOD_TAGS;
+          const updatedTags = [...currentTags];
+          const logTagNames = logData.tags || [];
+
+          logTagNames.forEach((tagName) => {
+            const index = updatedTags.findIndex(
+              (t) => t.name.toLowerCase() === tagName.toLowerCase(),
+            );
+            if (index !== -1) {
+              updatedTags[index] = {
+                ...updatedTags[index],
+                count: updatedTags[index].count + 1,
+              };
+            } else {
+              updatedTags.push({
+                id: generateId(),
+                name: tagName,
+                count: 1,
+              });
+            }
+          });
+
           return {
             moodLogs: {
               ...state.moodLogs,
               [logData.date]: [newLog, ...list],
             },
+            moodTags: updatedTags,
           };
         }),
 
       updateMoodLog: (id, date, updates) =>
         set((state) => {
           const list = state.moodLogs[date] || [];
+          const oldLog = list.find((item) => item.id === id);
           const updatedList = list.map((item) =>
             item.id === id ? { ...item, ...updates } : item,
           );
+
+          let updatedTags = state.moodTags || DEFAULT_MOOD_TAGS;
+          if (oldLog && updates.tags !== undefined) {
+            const oldTags = oldLog.tags || [];
+            const newTags = updates.tags || [];
+
+            const removed = oldTags.filter((t) => !newTags.includes(t));
+            const added = newTags.filter((t) => !oldTags.includes(t));
+
+            updatedTags = updatedTags.map((tagObj) => {
+              let newCount = tagObj.count;
+              if (
+                removed.some(
+                  (r) => r.toLowerCase() === tagObj.name.toLowerCase(),
+                )
+              ) {
+                newCount = Math.max(0, newCount - 1);
+              }
+              if (
+                added.some(
+                  (a) => a.toLowerCase() === tagObj.name.toLowerCase(),
+                )
+              ) {
+                newCount = newCount + 1;
+              }
+              return newCount !== tagObj.count
+                ? { ...tagObj, count: newCount }
+                : tagObj;
+            });
+
+            // If added tags were not in state.moodTags, append them
+            added.forEach((tagName) => {
+              if (
+                !updatedTags.some(
+                  (t) => t.name.toLowerCase() === tagName.toLowerCase(),
+                )
+              ) {
+                updatedTags.push({
+                  id: generateId(),
+                  name: tagName,
+                  count: 1,
+                });
+              }
+            });
+          }
+
           return {
             moodLogs: {
               ...state.moodLogs,
               [date]: updatedList,
             },
+            moodTags: updatedTags,
           };
         }),
 
       deleteMoodLog: (id, date) =>
         set((state) => {
           const list = state.moodLogs[date] || [];
+          const targetLog = list.find((item) => item.id === id);
+
+          let updatedTags = state.moodTags || DEFAULT_MOOD_TAGS;
+          if (targetLog && targetLog.tags && targetLog.tags.length > 0) {
+            const deletedTags = targetLog.tags;
+            updatedTags = updatedTags.map((tagObj) => {
+              if (
+                deletedTags.some(
+                  (d) => d.toLowerCase() === tagObj.name.toLowerCase(),
+                )
+              ) {
+                return { ...tagObj, count: Math.max(0, tagObj.count - 1) };
+              }
+              return tagObj;
+            });
+          }
+
           return {
             moodLogs: {
               ...state.moodLogs,
               [date]: list.filter((item) => item.id !== id),
             },
+            moodTags: updatedTags,
+          };
+        }),
+
+      addMoodTag: (tagName: string) =>
+        set((state) => {
+          const trimmed = tagName.trim();
+          if (!trimmed) return state;
+          const current = state.moodTags || DEFAULT_MOOD_TAGS;
+          if (
+            current.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())
+          ) {
+            return state;
+          }
+          return {
+            moodTags: [
+              ...current,
+              { id: generateId(), name: trimmed, count: 0 },
+            ],
+          };
+        }),
+
+      deleteMoodTag: (idOrName: string) =>
+        set((state) => {
+          const current = state.moodTags || DEFAULT_MOOD_TAGS;
+          return {
+            moodTags: current.filter(
+              (t) =>
+                t.id !== idOrName &&
+                t.name.toLowerCase() !== idOrName.toLowerCase(),
+            ),
           };
         }),
 
